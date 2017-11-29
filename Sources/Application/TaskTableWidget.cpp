@@ -9,8 +9,9 @@
 #include "Plugins/TaskManager.h"
 #include "TaskOptionDialog.h"
 
-TaskTableWidget::TaskTableWidget(TaskManager* taskManager)
-    : taskManager(taskManager)
+TaskTableWidget::TaskTableWidget(TaskManager* taskManager, QWidget* parent)
+    : QTableWidget(parent),
+      taskManager(taskManager)
 {
     setColumnCount(kTableLabels.size());
     setHorizontalHeaderLabels(kTableLabels);
@@ -31,12 +32,14 @@ TaskTableWidget::TaskTableWidget(TaskManager* taskManager)
     showOptionAct = new QAction("Option");
 
     connect(startAct, &QAction::triggered,
-            [index, this]() { taskManager.runTaskAt(index); });
+            [=]() { taskManager->runTaskAt(rowClicked); });
     connect(stopAct, &QAction::triggered,
-            [index, this]() { taskManager.stopTaskAt(index); });
-    TaskOptionDialog* tod = new TaskOptionDialog(task, this);
-    connect(showOptionAct, &QAction::triggered,
-            tod, &TaskOptionDialog::show);
+            [=]() { taskManager->stopTaskAt(rowClicked); });
+    connect(showOptionAct, &QAction::triggered, [=]() {
+        Task* task = taskManager->get(rowClicked);
+        TaskOptionDialog* dialog = new TaskOptionDialog(task, this);
+        dialog->show();
+    });
 }
 
 void TaskTableWidget::onRightMouseClicked(const QPoint& point) {
@@ -48,6 +51,7 @@ void TaskTableWidget::onRightMouseClicked(const QPoint& point) {
         popMenu->addAction(stopAct);
         popMenu->addAction(showOptionAct);
 
+        rowClicked = item->row();
         popMenu->exec(QCursor::pos());
     }
 }

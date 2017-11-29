@@ -17,7 +17,7 @@ class TaskTableWidget : public QTableWidget {
     };
 
 public:
-    TaskTableWidget(TaskManager* taskManager);
+    TaskTableWidget(TaskManager* taskManager, QWidget* parent = 0);
 
 private:
     void onRightMouseClicked(const QPoint& point);
@@ -29,6 +29,8 @@ private:
     QAction* startAct;
     QAction* stopAct;
     QAction* showOptionAct;
+
+    int rowClicked;
 };
 
 #endif // TASKTABLEWIDGET_H

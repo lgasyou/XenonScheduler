@@ -9,6 +9,7 @@
 #include <QTableWidget>
 #include <QPushButton>
 #include <QStringList>
+#include <QDebug>
 
 #include "ui_TaskOptionDialog.h"
 #include "Plugins/Task.h"
@@ -129,6 +130,11 @@ private:
         w->setLayout(l);
         ui->tabWidget->addTab(w, "Journal");
         operationTable = table;
+    }
+
+    void closeEvent(QCloseEvent* event) override {
+        deleteLater();
+        QDialog::closeEvent(event);
     }
 
 private:
