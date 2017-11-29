@@ -39,6 +39,7 @@ void CreateTaskWizard::accept() {
 
     Task* task = taskManager->create(name, brief, startTime, internal, opertion, arguments);
     scheduler->insertRow(task);
+    restart(); // In order to start at the beginning next time.
     QWizard::accept();
 }
 
