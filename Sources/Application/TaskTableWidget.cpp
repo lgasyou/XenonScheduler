@@ -37,16 +37,15 @@ TaskTableWidget::TaskTableWidget(TaskManager* taskManager, QWidget* parent)
             [=]() { taskManager->stopTaskAt(rowClicked); });
     connect(showOptionAct, &QAction::triggered, [=]() {
         Task* task = taskManager->get(rowClicked);
-        TaskOptionDialog* dialog = new TaskOptionDialog(task, this);
-        dialog->show();
+        TaskOptionDialog* dialog = new TaskOptionDialog(this);
+        dialog->showWithTaskOptions(task);
     });
 }
 
 void TaskTableWidget::onRightMouseClicked(const QPoint& point) {
-    popMenu->clear();
-
     QTableWidgetItem *item = itemAt(point);
     if (item) {
+        popMenu->clear();
         popMenu->addAction(startAct);
         popMenu->addAction(stopAct);
         popMenu->addAction(showOptionAct);

@@ -8,7 +8,6 @@ EditOperationDialog::EditOperationDialog(QWidget *parent) :
     ui->setupUi(this);
 }
 
-EditOperationDialog::~EditOperationDialog()
-{
+EditOperationDialog::~EditOperationDialog() {
     delete ui;
 }

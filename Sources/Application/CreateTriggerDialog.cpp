@@ -8,7 +8,6 @@ CreateTriggerDialog::CreateTriggerDialog(QWidget *parent) :
     ui->setupUi(this);
 }
 
-CreateTriggerDialog::~CreateTriggerDialog()
-{
+CreateTriggerDialog::~CreateTriggerDialog() {
     delete ui;
 }

@@ -32,13 +32,12 @@ class TaskOptionDialog : public QDialog {
     };
 
 public:
-    explicit TaskOptionDialog::TaskOptionDialog(Task* task, QWidget *parent = 0) :
+    explicit TaskOptionDialog::TaskOptionDialog(QWidget *parent = 0) :
         QDialog(parent),
         ui(new Ui::TaskOptionDialog)
     {
         ui->setupUi(this);
         resize(800, 600);
-        setWindowTitle(task->getName() + " - Properties");
 
         setupGeneralTab();
         setupTriggerTab();
@@ -51,9 +50,18 @@ public:
     }
 
 public slots:
-    void showTaskOptions(Task* task) {
+    void showWithTaskOptions(Task* task) {
+        setWindowTitle(task->getName() + " - Properties");
+
         nameEdit->setText(task->getName());
+        nameEdit->setDisabled(true);
+        locationEdit->setText("\\");
+        locationEdit->setDisabled(true);
         briefEdit->setPlainText(task->getDescription());
+
+        // TODO: add triggers and operations.
+
+        show();
     }
 
 private:

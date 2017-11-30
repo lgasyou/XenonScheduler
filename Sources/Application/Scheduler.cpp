@@ -8,7 +8,7 @@ Scheduler::Scheduler(QWidget *parent) :
     resize(900, 600);
 
     setupToolBar();
-    setupTableWidget();
+    setupTaskTableWidget();
     setupSystemTray();
 }
 

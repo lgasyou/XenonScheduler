@@ -5,24 +5,52 @@
 
 class Trigger {
 public:
-    enum Internal : qint64 {
-        Day         = 600*24,
-        Week        = Day*7,
-        Month       = Day*30,
-        Once        = -1,
-        StartingUp  = -2,
-        login       = -3,
+    enum IntervalType : qint64 {
+        Day,
+        Week,
+        Month,
+        Once,
+        StartingUp,
+        Login,
     };
 
-    Internal internal;
     QDateTime nextStartTime;
+    IntervalType intervalType;
+    qint64 interval;
 
-    Trigger(const QDateTime& nextStartTime, Internal internal)
+public:
+    Trigger(const QDateTime& nextStartTime, IntervalType intervalType, qint64 interval)
         : nextStartTime(nextStartTime),
-          internal(internal)
+          intervalType(intervalType),
+          interval(interval)
     {}
 
     Trigger() = default;
+
+    bool triggered() const {
+        return isPeriodic() && nextStartTime <= QDateTime::currentDateTime();
+    }
+
+    bool isPeriodic() const {
+        return intervalType != Once && intervalType != StartingUp && intervalType != Login;
+    }
+
+    void updateNextStartTime() {
+        switch (intervalType) {
+        case Day:
+            nextStartTime = nextStartTime.addDays(interval);
+            break;
+        case Week:
+            nextStartTime = nextStartTime.addDays(7*interval);
+            break;
+        case Month:
+            nextStartTime = nextStartTime.addMonths(interval);
+            break;
+        default:
+            break;
+        }
+    }
+
 };
 
 #endif // TRIGGER_H

@@ -6,9 +6,9 @@ GeneralSettingDialog::GeneralSettingDialog(QWidget *parent) :
     ui(new Ui::GeneralSettingDialog)
 {
     ui->setupUi(this);
+    setWindowTitle("General Settings");
 }
 
-GeneralSettingDialog::~GeneralSettingDialog()
-{
+GeneralSettingDialog::~GeneralSettingDialog() {
     delete ui;
 }

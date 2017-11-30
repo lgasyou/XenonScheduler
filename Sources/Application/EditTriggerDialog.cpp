@@ -8,7 +8,6 @@ EditTriggerDialog::EditTriggerDialog(QWidget *parent) :
     ui->setupUi(this);
 }
 
-EditTriggerDialog::~EditTriggerDialog()
-{
+EditTriggerDialog::~EditTriggerDialog() {
     delete ui;
 }

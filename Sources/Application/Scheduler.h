@@ -32,13 +32,13 @@ public:
 
     void removeRow(int index) {
         taskManager.remove(index);
-        tableWidget->removeRow(index);
+        taskTable->removeRow(index);
     }
 
 public slots:
     // if index is -1, then add at the last position.
     void insertRow(Task* task, int index = -1) {
-        QTableWidget* t = tableWidget;
+        QTableWidget* t = taskTable;
         if (index == -1) {
             index = t->rowCount();
         }
@@ -54,14 +54,14 @@ public slots:
     }
 
     void removeCurrentRow() {
-        int current = tableWidget->currentRow();
+        int current = taskTable->currentRow();
         if (current == -1) return;
 
         removeRow(current);
     }
 
     void duplicateCurrentRow() {
-        int current = tableWidget->currentRow();
+        int current = taskTable->currentRow();
         if (current == -1) return;
 
         Task* src = taskManager.get(current);
@@ -96,10 +96,10 @@ private:
         toolBar->addAction(settingAct);
     }
 
-    void setupTableWidget() {
+    void setupTaskTableWidget() {
         QTableWidget* t = new TaskTableWidget(&taskManager);
         setCentralWidget(t);
-        tableWidget = t;
+        taskTable = t;
     }
 
     void setupSystemTray() {
@@ -127,10 +127,11 @@ private:
 private:
     TaskManager taskManager;
     QToolBar* toolBar;
-    QTableWidget* tableWidget;
+    QTableWidget* taskTable;
     QSystemTrayIcon* systemTray;
     CreateTaskWizard* wizard;
     GeneralSettingDialog* settingDialog;
+
 };
 
 #endif // SCHEDULER_H

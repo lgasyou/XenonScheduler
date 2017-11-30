@@ -25,25 +25,37 @@ public:
             p->setProgram(op.program);
             p->setArguments(op.arguments);
             p->start();
+            qDebug() << "Task::start()";
+			// FIXME: won't output anything.
             QObject::connect(p, &QProcess::readyReadStandardOutput, [=]() {
                 qDebug() << p->readAllStandardOutput().data();
             });
+            QObject::connect(p, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
+                             [=](int code, QProcess::ExitStatus s) {
+                qDebug() << code << " " << s;
+                processes.removeOne(p);
+                delete p;
+            });
             processes.append(p);
+        }
+        for (Trigger& t : triggers) {
+            if (t.triggered()) {
+                t.updateNextStartTime();
+                qDebug() << t.nextStartTime;
+            }
         }
     }
 
     void terminate() {
         QMutexLocker locker(&mutex);
         for (auto p : processes) {
-            if (p->state() == QProcess::Running || p->state() == QProcess::Starting) {
-                p->terminate();
-                processes.removeOne(p);
-            }
+            p->kill();
         }
     }
 
     bool shouldRun() const {
-        return getNextStartTime() <= QDateTime::currentDateTime();
+        QDateTime nextStartTime = getNextStartTime();
+        return nextStartTime.isValid() && nextStartTime <= QDateTime::currentDateTime();
     }
 
     // Priority: Running > Starting > Stopped.
@@ -61,11 +73,14 @@ public:
         return hasOneProcessWhichIsStarting ? "Starting" : "Stopped";
     }
 
+    // Returns invalid QDateTime object if all triggers aren't periodic trigger.
     QDateTime getNextStartTime() const {
         QDateTime time;
         QMutexLocker locker(&mutex);
         for (const Trigger& t : triggers) {
-            time = std::min(time, t.nextStartTime);
+            if (t.isPeriodic()) {
+                time = time.isValid() ? std::min(time, t.nextStartTime) : t.nextStartTime;
+            }
         }
         return time;
     }
@@ -86,7 +101,8 @@ private:
     Task(const QString& name,
          const QString& description,
          const QDateTime& startTime,
-         Trigger::Internal internal,
+         Trigger::IntervalType internalType,
+         qint64 interval,
          const QString& operation,
          const QStringList& arguments);
 

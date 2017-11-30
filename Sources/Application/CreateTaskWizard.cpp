@@ -9,35 +9,35 @@
 #include <QPushButton>
 #include <QSpinBox>
 #include <QFileDialog>
+#include <tuple>
 
 #include "Scheduler.h"
 
-static void AddPages(CreateTaskWizard* wizard);
-
-const QStringList CreateTaskWizard::kInternalChoices = {
-    "day", "week", "month", "once", "startingUp", "login"
-};
+static void AddPagesHelper(CreateTaskWizard* wizard);
+static std::tuple<QDateTime, Trigger::IntervalType, int> GetExecuteTimeHelper(CreateTaskWizard* wizard);
 
 CreateTaskWizard::CreateTaskWizard(TaskManager* taskManager, Scheduler* scheduler)
     : QWizard(scheduler),
       taskManager(taskManager),
       scheduler(scheduler)
 {
-    setWindowTitle("Creating Task Wizard");
+    setWindowTitle("Creating Task");
     resize(800, 600);
-    ::AddPages(this);
+    ::AddPagesHelper(this);
 }
 
 void CreateTaskWizard::accept() {
     QString name = field("name").toString();
     QString brief = field("brief").toString();
-    QDateTime startTime = field("startTime").toDateTime();
-    int everyN = field("everyN").toInt();
-    Trigger::Internal internal = static_cast<Trigger::Internal>(everyN);
     QString opertion = field("task").toString();
     QStringList arguments = QStringList() << field("arguments").toString();
 
-    Task* task = taskManager->create(name, brief, startTime, internal, opertion, arguments);
+    std::tuple<QDateTime, Trigger::IntervalType, int> tuple = ::GetExecuteTimeHelper(this);
+    QDateTime startTime = std::get<0>(tuple);
+    Trigger::IntervalType intervalType = std::get<1>(tuple);
+    int interval = static_cast<Trigger::IntervalType>(std::get<2>(tuple));
+
+    Task* task = taskManager->create(name, brief, startTime, intervalType, interval, opertion, arguments);
     scheduler->insertRow(task);
     restart(); // In order to start at the beginning next time.
     QWizard::accept();
@@ -64,6 +64,7 @@ public:
         registerField("name*", nameEdit);
         registerField("brief", briefEdit);
     }
+
 };
 
 
@@ -73,13 +74,12 @@ public:
         : QWizardPage()
     {
         setTitle("Trigger");
-
-        QRadioButton* dailyBtn = new QRadioButton("Daily");
-        QRadioButton* weeklyBtn = new QRadioButton("Weekly");
-        QRadioButton* monthlyBtn = new QRadioButton("Monthly");
-        QRadioButton* onceBtn = new QRadioButton("Once");
-        QRadioButton* startingUpBtn = new QRadioButton("Starting Up");
-        QRadioButton* loginBtn = new QRadioButton("Login");
+        dailyBtn = new QRadioButton("Daily");
+        weeklyBtn = new QRadioButton("Weekly");
+        monthlyBtn = new QRadioButton("Monthly");
+        onceBtn = new QRadioButton("Once");
+        startingUpBtn = new QRadioButton("Starting Up");
+        loginBtn = new QRadioButton("Login");
         dailyBtn->click();
 
         QGridLayout* layout = new QGridLayout();
@@ -98,12 +98,44 @@ public:
         registerField("startingUp", startingUpBtn);
         registerField("login", loginBtn);
     }
+
+private:
+    int nextId() const override {
+        if (dailyBtn->isChecked()) {
+            return CreateTaskWizard::DailyTriggerPage;
+        }
+        if (weeklyBtn->isChecked()) {
+            return CreateTaskWizard::WeeklyTriggerPage;
+        }
+        if (monthlyBtn->isChecked()) {
+            return CreateTaskWizard::MonthlyTriggerPage;
+        }
+        if (onceBtn->isChecked()) {
+            return CreateTaskWizard::OnceTriggerPage;
+        }
+        if (startingUpBtn->isChecked()) {
+            return CreateTaskWizard::StartingUpTriggerPage;
+        }
+        if (loginBtn->isChecked()) {
+            return CreateTaskWizard::LoginTriggerPage;
+        }
+        throw std::exception("Unreachable");
+    }
+
+private:
+    QRadioButton* dailyBtn;
+    QRadioButton* weeklyBtn;
+    QRadioButton* monthlyBtn;
+    QRadioButton* onceBtn;
+    QRadioButton* startingUpBtn;
+    QRadioButton* loginBtn;
+
 };
 
 
-class TriggerPage : public QWizardPage {
+class DailyTriggerPage : public QWizardPage {
 public:
-    TriggerPage()
+    DailyTriggerPage()
         : QWizardPage()
     {
         setTitle("Daily");
@@ -112,7 +144,7 @@ public:
         QLabel* everyLabel = new QLabel("Every:");
         QSpinBox* everyNEdit = new QSpinBox();
         everyNEdit->setValue(1);
-        QLabel* everyN = new QLabel("Days");
+        QLabel* everyN = new QLabel("Day(s)");
 
         QGridLayout* layout = new QGridLayout();
         setLayout(layout);
@@ -122,9 +154,172 @@ public:
         layout->addWidget(everyNEdit, 1, 1);
         layout->addWidget(everyN, 1, 2);
 
-        registerField("startTime", startEdit);
-        registerField("everyN", everyNEdit);
+        registerField("dailyStartTime", startEdit);
+        registerField("everyNDays", everyNEdit);
     }
+
+private:
+    int nextId() const override {
+        return CreateTaskWizard::OperationPage;
+    }
+
+};
+
+
+class WeeklyTriggerPage : public QWizardPage {
+public:
+    WeeklyTriggerPage()
+        : QWizardPage()
+    {
+        setTitle("Weekly");
+        QLabel* startLabel = new QLabel("Start At:");
+        QDateTimeEdit* startEdit = new QDateTimeEdit(QDateTime::currentDateTime());
+        QLabel* everyLabel = new QLabel("Every:");
+        QSpinBox* everyNEdit = new QSpinBox();
+        everyNEdit->setValue(1);
+        QLabel* everyN = new QLabel("Week(s)");
+
+        QGridLayout* layout = new QGridLayout();
+        setLayout(layout);
+        layout->addWidget(startLabel, 0, 0);
+        layout->addWidget(startEdit, 0, 1);
+        layout->addWidget(everyLabel, 1, 0);
+        layout->addWidget(everyNEdit, 1, 1);
+        layout->addWidget(everyN, 1, 2);
+
+        registerField("weeklyStartTime", startEdit);
+        registerField("everyNWeeks", everyNEdit);
+    }
+
+private:
+    int nextId() const override {
+        return CreateTaskWizard::OperationPage;
+    }
+
+};
+
+
+class MonthlyTriggerPage : public QWizardPage {
+public:
+    MonthlyTriggerPage()
+        : QWizardPage()
+    {
+        setTitle("Monthly");
+        QLabel* startLabel = new QLabel("Start At:");
+        QDateTimeEdit* startEdit = new QDateTimeEdit(QDateTime::currentDateTime());
+        QLabel* everyLabel = new QLabel("Every:");
+        QSpinBox* everyNEdit = new QSpinBox();
+        everyNEdit->setValue(1);
+        QLabel* everyN = new QLabel("Month(s)");
+
+        QGridLayout* layout = new QGridLayout();
+        setLayout(layout);
+        layout->addWidget(startLabel, 0, 0);
+        layout->addWidget(startEdit, 0, 1);
+        layout->addWidget(everyLabel, 1, 0);
+        layout->addWidget(everyNEdit, 1, 1);
+        layout->addWidget(everyN, 1, 2);
+
+        registerField("monthlyStartTime", startEdit);
+        registerField("everyNMonths", everyNEdit);
+    }
+
+private:
+    int nextId() const override {
+        return CreateTaskWizard::OperationPage;
+    }
+
+};
+
+
+class OnceTriggerPage : public QWizardPage {
+public:
+    OnceTriggerPage()
+        : QWizardPage()
+    {
+        setTitle("Once");
+        QLabel* startLabel = new QLabel("Start At:");
+        QDateTimeEdit* startEdit = new QDateTimeEdit(QDateTime::currentDateTime());
+
+        QGridLayout* layout = new QGridLayout();
+        setLayout(layout);
+        layout->addWidget(startLabel, 0, 0);
+        layout->addWidget(startEdit, 0, 1);
+
+        registerField("onceStartTime", startEdit);
+    }
+
+private:
+    int nextId() const override {
+        return CreateTaskWizard::OperationPage;
+    }
+
+};
+
+
+class StartingUpTriggerPage : public QWizardPage {
+public:
+    StartingUpTriggerPage()
+        : QWizardPage()
+    {
+        setTitle("Starting Up");
+//        QLabel* startLabel = new QLabel("Start At:");
+//        QDateTimeEdit* startEdit = new QDateTimeEdit(QDateTime::currentDateTime());
+//        QLabel* everyLabel = new QLabel("Every:");
+//        QSpinBox* everyNEdit = new QSpinBox();
+//        everyNEdit->setValue(1);
+//        QLabel* everyN = new QLabel("Month(s)");
+
+//        QGridLayout* layout = new QGridLayout();
+//        setLayout(layout);
+//        layout->addWidget(startLabel, 0, 0);
+//        layout->addWidget(startEdit, 0, 1);
+//        layout->addWidget(everyLabel, 1, 0);
+//        layout->addWidget(everyNEdit, 1, 1);
+//        layout->addWidget(everyN, 1, 2);
+
+//        registerField("startTime", startEdit);
+//        registerField("everyN", everyNEdit);
+    }
+
+private:
+    int nextId() const override {
+        return CreateTaskWizard::OperationPage;
+    }
+
+};
+
+
+class LoginTriggerPage : public QWizardPage {
+public:
+    LoginTriggerPage()
+        : QWizardPage()
+    {
+        setTitle("Login");
+//        QLabel* startLabel = new QLabel("Start At:");
+//        QDateTimeEdit* startEdit = new QDateTimeEdit(QDateTime::currentDateTime());
+//        QLabel* everyLabel = new QLabel("Every:");
+//        QSpinBox* everyNEdit = new QSpinBox();
+//        everyNEdit->setValue(1);
+//        QLabel* everyN = new QLabel("Month(s)");
+
+//        QGridLayout* layout = new QGridLayout();
+//        setLayout(layout);
+//        layout->addWidget(startLabel, 0, 0);
+//        layout->addWidget(startEdit, 0, 1);
+//        layout->addWidget(everyLabel, 1, 0);
+//        layout->addWidget(everyNEdit, 1, 1);
+//        layout->addWidget(everyN, 1, 2);
+
+//        registerField("startTime", startEdit);
+//        registerField("everyN", everyNEdit);
+    }
+
+private:
+    int nextId() const override {
+        return CreateTaskWizard::OperationPage;
+    }
+
 };
 
 
@@ -199,22 +394,21 @@ public:
     void showEvent(QShowEvent* e) override {
         QString name = field("name").toString();
         QString brief = field("brief").toString();
-        QDateTime startTime = field("startTime").toDateTime();
-        int everyN = field("everyN").toInt();
         QString operation = field("task").toString();
         QString arguments = field("arguments").toString();
 
         nameEdit->setText(name);
         briefEdit->setText(brief);
-        const QStringList& choices = CreateTaskWizard::kInternalChoices;
-        for (const QString& c : choices) {
-            if (field(c).toBool()) {
-                QString triggerText = QString("Every %1 %2(s); Start at %3").arg(everyN).arg(c, startTime.toString());
-                triggerEdit->setText(triggerText);
-                break;
-            }
-        }
-        operationEdit->setText(operation + ';' + arguments);
+        // TODO: brief
+//        const QStringList& choices = CreateTaskWizard::kIntervalChoices;
+//        for (const QString& c : choices) {
+//            if (field(c).toBool()) {
+//                QString triggerText = QString("Every %1 %2(s); Start at %3").arg(everyN).arg(c, startTime.toString());
+//                triggerEdit->setText(triggerText);
+//                break;
+//            }
+//        }
+        operationEdit->setText(operation + "; " + arguments);
         QWizardPage::showEvent(e);
     }
 
@@ -226,10 +420,51 @@ private:
 };
 
 
-static inline void AddPages(CreateTaskWizard* wizard) {
+static inline void AddPagesHelper(CreateTaskWizard* wizard) {
     wizard->addPage(new BasicPage());
     wizard->addPage(new SelectingTriggerPage());
-    wizard->addPage(new TriggerPage());
+    wizard->addPage(new DailyTriggerPage());
+    wizard->addPage(new WeeklyTriggerPage());
+    wizard->addPage(new MonthlyTriggerPage());
+    wizard->addPage(new OnceTriggerPage());
+    wizard->addPage(new StartingUpTriggerPage());
+    wizard->addPage(new LoginTriggerPage());
     wizard->addPage(new OperationPage());
     wizard->addPage(new FinishingPage());
+}
+
+
+static std::tuple<QDateTime, Trigger::IntervalType, int> GetExecuteTimeHelper(CreateTaskWizard* wizard) {
+    if (wizard->field("day").toBool()) {
+        QDateTime startTime = wizard->field("dailyStartTime").toDateTime();
+        int interval = wizard->field("everyNDays").toInt();
+        return { startTime, Trigger::Day, interval };
+    }
+
+    if (wizard->field("week").toBool()) {
+        QDateTime startTime = wizard->field("weeklyStartTime").toDateTime();
+        int interval = wizard->field("everyNWeeks").toInt();
+        return { startTime, Trigger::Week, interval };
+    }
+
+    if (wizard->field("month").toBool()) {
+        QDateTime startTime = wizard->field("monthlyStartTime").toDateTime();
+        int interval = wizard->field("everyNMonths").toInt();
+        return { startTime, Trigger::Month, interval };
+    }
+
+    if (wizard->field("once").toBool()) {
+        QDateTime startTime = wizard->field("onceStartTime").toDateTime();
+        return { startTime, Trigger::Once, -1 };
+    }
+
+    if (wizard->field("startingUp").toBool()) {
+        return { QDateTime(), Trigger::StartingUp, -1 };
+    }
+
+    if (wizard->field("login").toBool()) {
+        return { QDateTime(), Trigger::Login, -1 };
+    }
+
+    throw std::exception("Unreachable");
 }

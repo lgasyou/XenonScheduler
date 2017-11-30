@@ -11,12 +11,14 @@
 
 class TaskManager : public QThread {
 public:
-    TaskManager();
+    TaskManager(int checkInterval = 1);
     ~TaskManager() {
+        mutex.lock();
         for (Task* t : tasks) {
             t->terminate();
             delete t;
         }
+        mutex.unlock();
         terminate();
         wait();
     }
@@ -36,28 +38,32 @@ public:
     Task* create(const QString& name,
                  const QString& description,
                  const QDateTime& startTime,
-                 Trigger::Internal internal,
+                 Trigger::IntervalType internalType,
+                 qint64 interval,
                  const QString& operation,
                  const QStringList& arguments) {
-        return new Task(name, description, startTime, internal, operation, arguments);
+        return new Task(name, description, startTime, internalType, interval, operation, arguments);
     }
 
     // Duplicate basic infomations only,
-    // without its running state.
+    // without its runtime state.
     Task* duplicate(Task* rhs) {
         return new Task(*rhs);
     }
 
     void append(Task* task) {
+        QMutexLocker locker(&mutex);
         tasks.append(task);
     }
 
     void insert(Task* task, int index) {
+        QMutexLocker locker(&mutex);
         tasks.insert(index, task);
     }
 
     void remove(int index) {
         tasks[index]->terminate();
+        QMutexLocker locker(&mutex);
         tasks.remove(index);
     }
 
@@ -68,6 +74,9 @@ public:
     int size() const {
         return tasks.size();
     }
+
+    int getCheckInterval() const;
+    void setCheckInterval(int value);
 
 private:
     void run() override {
@@ -84,7 +93,7 @@ private:
                 }
             }
             mutex.unlock();
-            sleep(1);
+            sleep(checkInterval);
         }
     }
 
@@ -96,8 +105,9 @@ private:
     }
 
 private:
-    bool manuallyStopped = false;
+    int checkInterval;
     QVector<Task*> tasks;
+    bool manuallyStopped = false;
     mutable QMutex mutex;
 
 };

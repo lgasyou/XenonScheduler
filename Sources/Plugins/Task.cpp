@@ -3,13 +3,14 @@
 Task::Task(const QString& name,
            const QString& description,
            const QDateTime& startTime,
-           Trigger::Internal internal,
+           Trigger::IntervalType internalType,
+           qint64 interval,
            const QString& rawOperation,
            const QStringList& arguments)
     : name(name), description(description)
 {
     Operation operation(rawOperation, arguments);
-    Trigger trigger(startTime, internal);
+    Trigger trigger(startTime, internalType, interval);
     operations.append(operation);
     triggers.append(trigger);
 }

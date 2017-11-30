@@ -11,7 +11,18 @@ class Scheduler;
 
 class CreateTaskWizard : public QWizard {
 public:
-    static const QStringList kInternalChoices;
+    enum PageId {
+        BasicPage,
+        SelectingTriggerPage,
+        DailyTriggerPage,
+        WeeklyTriggerPage,
+        MonthlyTriggerPage,
+        OnceTriggerPage,
+        StartingUpTriggerPage,
+        LoginTriggerPage,
+        OperationPage,
+        FinishingPage,
+    };
 
     CreateTaskWizard(TaskManager* taskManager, Scheduler* scheduler = 0);
 

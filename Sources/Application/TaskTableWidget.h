@@ -9,7 +9,7 @@ class TaskManager;
 
 class TaskTableWidget : public QTableWidget {
     const QStringList kTableLabels = {
-        "Script",
+        "Task",
         "State",
         "Next Start Time",
         "Last Run Time",
