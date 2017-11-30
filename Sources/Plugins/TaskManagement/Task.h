@@ -1,6 +1,7 @@
 #ifndef TASK_H
 #define TASK_H
 
+#include <QObject>
 #include <QString>
 #include <QVector>
 #include <QProcess>
@@ -14,42 +15,27 @@
 
 class TaskManager;
 
-class Task {
+class Task : public QObject {
+    Q_OBJECT
+
     friend class TaskManager;
 
 public:
     void start() {
-        QMutexLocker locker(&mutex);
-        for (const Operation& op : operations) {
-            QProcess* p = new QProcess();
-            p->setProgram(op.program);
-            p->setArguments(op.arguments);
-            p->start();
-            qDebug() << "Task::start()";
-			// FIXME: won't output anything.
-            QObject::connect(p, &QProcess::readyReadStandardOutput, [=]() {
-                qDebug() << p->readAllStandardOutput().data();
-            });
-            QObject::connect(p, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
-                             [=](int code, QProcess::ExitStatus s) {
-                qDebug() << code << " " << s;
-                processes.removeOne(p);
-                delete p;
-            });
-            processes.append(p);
+        {
+            QMutexLocker locker(&mutex);
+            startOperations();
+            updateTriggers();
         }
-        for (Trigger& t : triggers) {
-            if (t.triggered()) {
-                t.updateNextStartTime();
-                qDebug() << t.nextStartTime;
-            }
-        }
+
+        emit stateChanged();
     }
 
-    void terminate() {
+    void kill() {
         QMutexLocker locker(&mutex);
         for (auto p : processes) {
             p->kill();
+            qDebug() << p->state();
         }
     }
 
@@ -97,6 +83,9 @@ public:
     QString getLastRunResult() const;
     void setLastRunResult(const QString& value);
 
+signals:
+    void stateChanged();
+
 private:
     Task(const QString& name,
          const QString& description,
@@ -112,6 +101,39 @@ private:
           operations(rhs.operations),
           triggers(rhs.triggers)
     {}
+
+    void startOperations() {
+        for (const Operation& op : operations) {
+            QProcess* p = new QProcess();
+            p->setProgram(op.program);
+            p->setArguments(op.arguments);
+            p->start();
+            processes.append(p);
+            qDebug() << "Task::start()";
+
+            // FIXME: won't output anything.
+            connect(p, &QProcess::readyReadStandardOutput, [=]() {
+                qDebug() << p->readAllStandardOutput().data();
+            });
+            connect(p, &QProcess::stateChanged, [=]() {
+                emit stateChanged();
+            });
+            connect(p, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
+                    [=](int code, QProcess::ExitStatus s) {
+                qDebug() << code << " " << s;
+                processes.removeOne(p);
+                delete p;
+            });
+        }
+    }
+
+    void updateTriggers() {
+        for (Trigger& t : triggers) {
+            if (t.triggered()) {
+                t.updateNextStartTime();
+            }
+        }
+    }
 
 private:
     QString name;

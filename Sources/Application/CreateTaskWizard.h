@@ -5,7 +5,7 @@
 #include <QVariant>
 #include <QDateTime>
 
-#include "Plugins/TaskManager.h"
+#include "Plugins/TaskManagement/TaskManager.h"
 
 class Scheduler;
 

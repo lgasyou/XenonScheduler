@@ -6,7 +6,7 @@
 #include <QPoint>
 #include <QDebug>
 
-#include "Plugins/TaskManager.h"
+#include "Plugins/TaskManagement/TaskManager.h"
 #include "TaskOptionDialog.h"
 
 TaskTableWidget::TaskTableWidget(TaskManager* taskManager, QWidget* parent)

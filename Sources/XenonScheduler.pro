@@ -33,11 +33,11 @@ SOURCES += \
     Application/main.cpp \
     Application/Scheduler.cpp \
     Application/TaskOptionDialog.cpp \
-    Plugins/Task.cpp \
-    Plugins/TaskManager.cpp \
-    Plugins/Trigger.cpp \
-    Plugins/Operation.cpp \
-    Application/TaskTableWidget.cpp
+    Application/TaskTableWidget.cpp \
+    Plugins/TaskManagement/Operation.cpp \
+    Plugins/TaskManagement/Task.cpp \
+    Plugins/TaskManagement/TaskManager.cpp \
+    Plugins/TaskManagement/Trigger.cpp
 
 HEADERS += \ 
     Application/CreateOperationDialog.h \
@@ -48,11 +48,11 @@ HEADERS += \
     Application/GeneralSettingDialog.h \
     Application/Scheduler.h \
     Application/TaskOptionDialog.h \
-    Plugins/Task.h \
-    Plugins/TaskManager.h \
-    Plugins/Trigger.h \
-    Plugins/Operation.h \
-    Application/TaskTableWidget.h
+    Application/TaskTableWidget.h \
+    Plugins/TaskManagement/Operation.h \
+    Plugins/TaskManagement/Task.h \
+    Plugins/TaskManagement/TaskManager.h \
+    Plugins/TaskManagement/Trigger.h
 
 FORMS += \ 
     Application/CreateOperationDialog.ui \

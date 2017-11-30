@@ -37,7 +37,7 @@ void CreateTaskWizard::accept() {
     Trigger::IntervalType intervalType = std::get<1>(tuple);
     int interval = static_cast<Trigger::IntervalType>(std::get<2>(tuple));
 
-    Task* task = taskManager->create(name, brief, startTime, intervalType, interval, opertion, arguments);
+    Task* task = TaskManager::create(name, brief, startTime, intervalType, interval, opertion, arguments);
     scheduler->insertRow(task);
     restart(); // In order to start at the beginning next time.
     QWizard::accept();

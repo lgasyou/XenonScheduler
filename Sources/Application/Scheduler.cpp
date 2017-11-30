@@ -10,6 +10,9 @@ Scheduler::Scheduler(QWidget *parent) :
     setupToolBar();
     setupTaskTableWidget();
     setupSystemTray();
+
+    connect(&taskManager, &TaskManager::taskStateChanged,
+            this,         &Scheduler::updateRow);
 }
 
 Scheduler::~Scheduler() {

@@ -11,7 +11,7 @@
 #include <QHeaderView>
 #include <QDebug>
 
-#include "Plugins/TaskManager.h"
+#include "Plugins/TaskManagement/TaskManager.h"
 #include "CreateTaskWizard.h"
 #include "GeneralSettingDialog.h"
 #include "TaskOptionDialog.h"
@@ -51,6 +51,16 @@ public slots:
         t->setItem(index, 2, new QTableWidgetItem(task->getNextStartTime().toString()));
         t->setItem(index, 3, new QTableWidgetItem(task->getLastStartTime().toString()));
         t->setItem(index, 4, new QTableWidgetItem(task->getLastRunResult()));
+    }
+
+    void updateRow(int index) {
+        qDebug() << "Scheduler::updateRow(int)";
+        Task* task = taskManager.get(index);
+        taskTable->setItem(index, 0, new QTableWidgetItem(task->getName()));
+        taskTable->setItem(index, 1, new QTableWidgetItem(task->getState()));
+        taskTable->setItem(index, 2, new QTableWidgetItem(task->getNextStartTime().toString()));
+        taskTable->setItem(index, 3, new QTableWidgetItem(task->getLastStartTime().toString()));
+        taskTable->setItem(index, 4, new QTableWidgetItem(task->getLastRunResult()));
     }
 
     void removeCurrentRow() {

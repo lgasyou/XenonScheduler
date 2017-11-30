@@ -10,12 +10,24 @@
 #include "Task.h"
 
 class TaskManager : public QThread {
+    Q_OBJECT
+
 public:
+    static Task* create(const QString& name,
+                 const QString& description,
+                 const QDateTime& startTime,
+                 Trigger::IntervalType internalType,
+                 qint64 interval,
+                 const QString& operation,
+                 const QStringList& arguments) {
+        return new Task(name, description, startTime, internalType, interval, operation, arguments);
+    }
+
     TaskManager(int checkInterval = 1);
     ~TaskManager() {
         mutex.lock();
         for (Task* t : tasks) {
-            t->terminate();
+            t->kill();
             delete t;
         }
         mutex.unlock();
@@ -28,21 +40,11 @@ public:
     }
 
     void stopTaskAt(int index) {
-        tasks[index]->terminate();
+        tasks[index]->kill();
     }
 
     void stop() {
         manuallyStopped = true;
-    }
-
-    Task* create(const QString& name,
-                 const QString& description,
-                 const QDateTime& startTime,
-                 Trigger::IntervalType internalType,
-                 qint64 interval,
-                 const QString& operation,
-                 const QStringList& arguments) {
-        return new Task(name, description, startTime, internalType, interval, operation, arguments);
     }
 
     // Duplicate basic infomations only,
@@ -54,15 +56,18 @@ public:
     void append(Task* task) {
         QMutexLocker locker(&mutex);
         tasks.append(task);
+        connectTaskSignal(task);
     }
 
     void insert(Task* task, int index) {
         QMutexLocker locker(&mutex);
         tasks.insert(index, task);
+        connectTaskSignal(task);
     }
 
     void remove(int index) {
-        tasks[index]->terminate();
+        tasks[index]->kill();
+        delete tasks[index];
         QMutexLocker locker(&mutex);
         tasks.remove(index);
     }
@@ -71,12 +76,19 @@ public:
         return tasks[index];
     }
 
+    int indexOf(Task* task) const {
+        return tasks.indexOf(task);
+    }
+
     int size() const {
         return tasks.size();
     }
 
     int getCheckInterval() const;
     void setCheckInterval(int value);
+
+signals:
+    void taskStateChanged(int index);
 
 private:
     void run() override {
@@ -97,11 +109,11 @@ private:
         }
     }
 
-    void runAll() {
-        QMutexLocker locker(&mutex);
-        for (Task* t : tasks) {
-            t->start();
-        }
+    void connectTaskSignal(Task* task) {
+        connect(task, &Task::stateChanged, [=]() {
+            int index = indexOf(task);
+            emit taskStateChanged(index);
+        });
     }
 
 private:

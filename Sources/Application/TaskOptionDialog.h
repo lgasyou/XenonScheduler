@@ -12,7 +12,7 @@
 #include <QDebug>
 
 #include "ui_TaskOptionDialog.h"
-#include "Plugins/Task.h"
+#include "Plugins/TaskManagement/Task.h"
 
 namespace Ui {
 class TaskOptionDialog;
