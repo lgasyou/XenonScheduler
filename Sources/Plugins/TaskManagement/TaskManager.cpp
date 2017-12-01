@@ -1,9 +1,11 @@
 #include "TaskManager.h"
 
 TaskManager::TaskManager(int checkInterval)
-    : checkInterval(checkInterval)
+    : checkInterval(checkInterval),
+      autorunThread(this)
 {
-    start();
+    manuallyStopped = false;
+    autorunThread.start();
 }
 
 int TaskManager::getCheckInterval() const {

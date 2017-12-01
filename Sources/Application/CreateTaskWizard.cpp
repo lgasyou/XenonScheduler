@@ -330,7 +330,7 @@ public:
     {
         setTitle("Operation");
         QLabel* taskLabel = new QLabel("Program or Script:");
-        QLineEdit* taskEdit = new QLineEdit();
+        QLineEdit* taskEdit = new QLineEdit("python");
 
         QPushButton* taskBrowser = new QPushButton("Browser");
         QFileDialog* browerDialog = new QFileDialog(this);
@@ -340,7 +340,7 @@ public:
                 taskEdit, &QLineEdit::setText);
 
         QLabel* addArgLabel = new QLabel("Add Arguments(Optional):");
-        QLineEdit* addArgEdit = new QLineEdit();
+        QLineEdit* addArgEdit = new QLineEdit("F:/Scripts/encoding_tester.py");
 
         QGridLayout* layout = new QGridLayout();
         setLayout(layout);
@@ -350,7 +350,8 @@ public:
         layout->addWidget(addArgLabel, 2, 0);
         layout->addWidget(addArgEdit, 2, 1);
 
-        registerField("task*", taskEdit);
+        // TODO: recover this.
+        registerField("task", taskEdit);
         registerField("arguments", addArgEdit);
     }
 };

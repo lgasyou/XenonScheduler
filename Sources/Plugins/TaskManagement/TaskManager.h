@@ -1,16 +1,17 @@
 #ifndef TASKMANAGER_H
 #define TASKMANAGER_H
 
-#include <QThread>
 #include <QVector>
 #include <QDateTime>
-#include <QMutex>
 #include <QDebug>
 
 #include "Task.h"
+#include "TaskAutorunThread.h"
 
-class TaskManager : public QThread {
+class TaskManager : public QObject {
     Q_OBJECT
+
+    friend class TaskAutorunThread;
 
 public:
     static Task* create(const QString& name,
@@ -25,14 +26,11 @@ public:
 
     TaskManager(int checkInterval = 1);
     ~TaskManager() {
-        mutex.lock();
         for (Task* t : tasks) {
             t->kill();
             delete t;
         }
-        mutex.unlock();
-        terminate();
-        wait();
+        autorunThread.terminate();
     }
 
     void runTaskAt(int index) {
@@ -47,20 +45,18 @@ public:
         manuallyStopped = true;
     }
 
-    // Duplicate basic infomations only,
-    // without its runtime state.
+    // Duplicates basic infomations only,
+    // doesn't include its runtime state.
     Task* duplicate(Task* rhs) {
         return new Task(*rhs);
     }
 
     void append(Task* task) {
-        QMutexLocker locker(&mutex);
         tasks.append(task);
         connectTaskSignal(task);
     }
 
     void insert(Task* task, int index) {
-        QMutexLocker locker(&mutex);
         tasks.insert(index, task);
         connectTaskSignal(task);
     }
@@ -68,7 +64,6 @@ public:
     void remove(int index) {
         tasks[index]->kill();
         delete tasks[index];
-        QMutexLocker locker(&mutex);
         tasks.remove(index);
     }
 
@@ -91,24 +86,6 @@ signals:
     void taskStateChanged(int index);
 
 private:
-    void run() override {
-        manuallyStopped = false;
-        runPending();
-    }
-
-    void runPending() {
-        while (!manuallyStopped) {
-            mutex.lock();
-            for (Task* t : tasks) {
-                if (t->shouldRun()) {
-                    t->start();
-                }
-            }
-            mutex.unlock();
-            sleep(checkInterval);
-        }
-    }
-
     void connectTaskSignal(Task* task) {
         connect(task, &Task::stateChanged, [=]() {
             int index = indexOf(task);
@@ -119,8 +96,9 @@ private:
 private:
     int checkInterval;
     QVector<Task*> tasks;
+    TaskAutorunThread autorunThread;
+
     bool manuallyStopped = false;
-    mutable QMutex mutex;
 
 };
 

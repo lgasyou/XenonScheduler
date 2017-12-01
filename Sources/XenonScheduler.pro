@@ -37,7 +37,8 @@ SOURCES += \
     Plugins/TaskManagement/Operation.cpp \
     Plugins/TaskManagement/Task.cpp \
     Plugins/TaskManagement/TaskManager.cpp \
-    Plugins/TaskManagement/Trigger.cpp
+    Plugins/TaskManagement/Trigger.cpp \
+    Plugins/TaskManagement/TaskAutorunThread.cpp
 
 HEADERS += \ 
     Application/CreateOperationDialog.h \
@@ -52,7 +53,8 @@ HEADERS += \
     Plugins/TaskManagement/Operation.h \
     Plugins/TaskManagement/Task.h \
     Plugins/TaskManagement/TaskManager.h \
-    Plugins/TaskManagement/Trigger.h
+    Plugins/TaskManagement/Trigger.h \
+    Plugins/TaskManagement/TaskAutorunThread.h
 
 FORMS += \ 
     Application/CreateOperationDialog.ui \

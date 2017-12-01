@@ -1,7 +1,7 @@
 #ifndef TASK_H
 #define TASK_H
 
-#include <QObject>
+#include <QThread>
 #include <QString>
 #include <QVector>
 #include <QProcess>
@@ -23,7 +23,6 @@ class Task : public QObject {
 public:
     void start() {
         {
-            QMutexLocker locker(&mutex);
             startOperations();
             updateTriggers();
         }
@@ -32,10 +31,9 @@ public:
     }
 
     void kill() {
-        QMutexLocker locker(&mutex);
-        for (auto p : processes) {
-            p->kill();
-            qDebug() << p->state();
+        // FIXME: cannot be killed when start automaticly.
+        for (Operation& op : operations) {
+            op.killProcess();
         }
     }
 
@@ -46,23 +44,28 @@ public:
 
     // Priority: Running > Starting > Stopped.
     QString getState() const {
-        bool hasOneProcessWhichIsStarting = false;
-        QMutexLocker locker(&mutex);
-        for (auto p : processes) {
-            if (p->state() == QProcess::Running) {
-                return "Running";
+        int runningCnt = 0, startingCnt = 0, notRunningCnt = 0;
+        for (const Operation& op : operations) {
+            QProcess* p = op.process;
+            if (p == nullptr) {
+                continue;
             }
-            if (p->state() == QProcess::Starting) {
-                hasOneProcessWhichIsStarting = true;
+
+            if (p->state() == QProcess::Running) {
+                ++runningCnt;
+            } else if (p->state() == QProcess::Starting) {
+                ++startingCnt;
+            } else if (p->state() == QProcess::NotRunning) {
+                ++notRunningCnt;
             }
         }
-        return hasOneProcessWhichIsStarting ? "Starting" : "Stopped";
+        // FIXME: Not Running's object should be Operation, not QProcess.
+        return QString("%1 Running, %2 Starting, %3 Not Running").arg(runningCnt).arg(startingCnt).arg(notRunningCnt);
     }
 
     // Returns invalid QDateTime object if all triggers aren't periodic trigger.
     QDateTime getNextStartTime() const {
         QDateTime time;
-        QMutexLocker locker(&mutex);
         for (const Trigger& t : triggers) {
             if (t.isPeriodic()) {
                 time = time.isValid() ? std::min(time, t.nextStartTime) : t.nextStartTime;
@@ -103,27 +106,30 @@ private:
     {}
 
     void startOperations() {
-        for (const Operation& op : operations) {
-            QProcess* p = new QProcess();
-            p->setProgram(op.program);
-            p->setArguments(op.arguments);
-            p->start();
-            processes.append(p);
-            qDebug() << "Task::start()";
+        for (Operation& op : operations) {
+            if (op.process && op.process->state() != QProcess::NotRunning) {
+                continue;
+            }
 
-            // FIXME: won't output anything.
+            QProcess*& p = op.process = new QProcess();
             connect(p, &QProcess::readyReadStandardOutput, [=]() {
                 qDebug() << p->readAllStandardOutput().data();
             });
             connect(p, &QProcess::stateChanged, [=]() {
+                qDebug() << p->state();
                 emit stateChanged();
             });
-            connect(p, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
-                    [=](int code, QProcess::ExitStatus s) {
+            connect(p, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+                    [&](int code, QProcess::ExitStatus s) {
                 qDebug() << code << " " << s;
-                processes.removeOne(p);
                 delete p;
+                p = nullptr;
+                emit stateChanged();
             });
+
+            p->setProgram(op.program);
+            p->setArguments(op.arguments);
+            p->start();
         }
     }
 
@@ -142,7 +148,6 @@ private:
     QVector<Trigger> triggers;
     QDateTime lastStartTime;
     QString lastRunResult;
-    QList<QProcess*> processes;
 
     mutable QMutex mutex;
 
