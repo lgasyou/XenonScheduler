@@ -5,7 +5,10 @@ TaskManager::TaskManager(int checkInterval)
       autorunThread(this)
 {
     manuallyStopped = false;
-//    autorunThread.start();
+
+    connect(&autorunThread, &TaskAutorunThread::shouldStartTask,
+            this,           &TaskManager::startTask);
+    autorunThread.start();
 }
 
 int TaskManager::getCheckInterval() const {

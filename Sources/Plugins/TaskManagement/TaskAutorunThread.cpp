@@ -8,7 +8,7 @@ void TaskAutorunThread::run() {
 
         for (Task* t : tasks) {
             if (t->shouldRun()) {
-                t->start();
+                emit shouldStartTask(t);
             }
         }
         sleep(checkInterval);

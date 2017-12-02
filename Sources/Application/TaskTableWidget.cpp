@@ -32,7 +32,7 @@ TaskTableWidget::TaskTableWidget(TaskManager* taskManager, QWidget* parent)
     showOptionAct = new QAction("Option");
 
     connect(startAct, &QAction::triggered,
-            [=]() { taskManager->runTaskAt(rowClicked); });
+            [=]() { taskManager->startTaskAt(rowClicked); });
     connect(stopAct, &QAction::triggered,
             [=]() { taskManager->stopTaskAt(rowClicked); });
     connect(showOptionAct, &QAction::triggered, [=]() {

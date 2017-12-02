@@ -3,6 +3,7 @@
 
 #include <QThread>
 
+class Task;
 class TaskManager;
 
 class TaskAutorunThread : public QThread {
@@ -12,6 +13,9 @@ public:
     TaskAutorunThread(TaskManager* taskManager)
         : taskManager(taskManager)
     {}
+
+signals:
+    void shouldStartTask(Task* task);
 
 private:
     void run() override;

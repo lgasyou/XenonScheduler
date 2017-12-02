@@ -350,7 +350,7 @@ public:
         layout->addWidget(addArgLabel, 2, 0);
         layout->addWidget(addArgEdit, 2, 1);
 
-        // TODO: recover this.
+        // TODO: recover to "task*" when release this program.
         registerField("task", taskEdit);
         registerField("arguments", addArgEdit);
     }

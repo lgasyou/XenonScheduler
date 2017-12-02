@@ -33,10 +33,16 @@ public:
         autorunThread.terminate();
     }
 
-    void runTaskAt(int index) {
+    void startTaskAt(int index) {
         tasks[index]->start();
     }
 
+public slots:
+    void startTask(Task* task) {
+        task->start();
+    }
+
+public:
     void stopTaskAt(int index) {
         tasks[index]->kill();
     }

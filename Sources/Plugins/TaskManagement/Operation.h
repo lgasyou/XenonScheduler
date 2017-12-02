@@ -22,7 +22,7 @@ public:
 
     Operation() = default;
 
-    void killProcess() {
+    void killActiveProcess() {
         process->kill();
         qDebug() << process->state();
         qDebug() << "Operation::killProcess()";

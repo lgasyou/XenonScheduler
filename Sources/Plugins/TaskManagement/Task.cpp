@@ -10,8 +10,22 @@ Task::Task(const QString& name,
     : name(name), description(description)
 {
     Operation operation(rawOperation, arguments);
-    Trigger trigger(startTime, internalType, interval);
     operations.append(operation);
+    QProcess*& p = operation.process;
+    connect(p, &QProcess::readyReadStandardOutput, [=]() {
+        qDebug() << p->readAllStandardOutput().data();
+    });
+    connect(p, &QProcess::stateChanged, [=]() {
+        qDebug() << p->state();
+        emit stateChanged();
+    });
+    connect(p, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+            [&](int code, QProcess::ExitStatus s) {
+        qDebug() << code << " " << s;
+        emit stateChanged();
+    });
+
+    Trigger trigger(startTime, internalType, interval);
     triggers.append(trigger);
 }
 

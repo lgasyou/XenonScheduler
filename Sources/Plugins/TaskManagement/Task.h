@@ -21,18 +21,14 @@ class Task : public QObject {
 
 public:
     void start() {
-        {
-            startOperations();
-            updateTriggers();
-        }
-
+        startOperations();
+        updateTriggers();
         emit stateChanged();
     }
 
     void kill() {
-        // FIXME: cannot be killed when start automaticly.
         for (Operation& op : operations) {
-            op.killProcess();
+            op.killActiveProcess();
         }
     }
 
@@ -54,7 +50,6 @@ public:
                 ++notRunningCnt;
             }
         }
-        // FIXME: Not Running's object should be Operation, not QProcess.
         return QString("%1 Running, %2 Starting, %3 Not Running").arg(runningCnt).arg(startingCnt).arg(notRunningCnt);
     }
 
@@ -107,19 +102,6 @@ private:
             }
 
             QProcess*& p = op.process;
-            connect(p, &QProcess::readyReadStandardOutput, [=]() {
-                qDebug() << p->readAllStandardOutput().data();
-            });
-            connect(p, &QProcess::stateChanged, [=]() {
-                qDebug() << p->state();
-                emit stateChanged();
-            });
-            connect(p, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-                    [&](int code, QProcess::ExitStatus s) {
-                qDebug() << code << " " << s;
-                emit stateChanged();
-            });
-
             p->setProgram(op.program);
             p->setArguments(op.arguments);
             p->start();
