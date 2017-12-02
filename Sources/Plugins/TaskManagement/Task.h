@@ -6,7 +6,6 @@
 #include <QVector>
 #include <QProcess>
 #include <QDateTime>
-#include <QMutex>
 #include <QDebug>
 #include <algorithm>
 
@@ -47,10 +46,6 @@ public:
         int runningCnt = 0, startingCnt = 0, notRunningCnt = 0;
         for (const Operation& op : operations) {
             QProcess* p = op.process;
-            if (p == nullptr) {
-                continue;
-            }
-
             if (p->state() == QProcess::Running) {
                 ++runningCnt;
             } else if (p->state() == QProcess::Starting) {
@@ -107,11 +102,11 @@ private:
 
     void startOperations() {
         for (Operation& op : operations) {
-            if (op.process && op.process->state() != QProcess::NotRunning) {
+            if (op.process->state() != QProcess::NotRunning) {
                 continue;
             }
 
-            QProcess*& p = op.process = new QProcess();
+            QProcess*& p = op.process;
             connect(p, &QProcess::readyReadStandardOutput, [=]() {
                 qDebug() << p->readAllStandardOutput().data();
             });
@@ -122,8 +117,6 @@ private:
             connect(p, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
                     [&](int code, QProcess::ExitStatus s) {
                 qDebug() << code << " " << s;
-                delete p;
-                p = nullptr;
                 emit stateChanged();
             });
 
@@ -148,8 +141,6 @@ private:
     QVector<Trigger> triggers;
     QDateTime lastStartTime;
     QString lastRunResult;
-
-    mutable QMutex mutex;
 
 };
 

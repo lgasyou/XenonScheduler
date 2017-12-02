@@ -10,23 +10,22 @@ class Operation {
 public:
     QString program;
     QStringList arguments;
-    QProcess* process = nullptr;
+    QProcess* process;
 
 public:
     Operation(const QString& program,
               const QStringList& arguments = QStringList())
         : program(program),
-          arguments(arguments)
+          arguments(arguments),
+          process(new QProcess())
     {}
 
     Operation() = default;
 
     void killProcess() {
-        if (process) {
-            process->kill();
-            qDebug() << process->state();
-            qDebug() << "Operation::killProcess()";
-        }
+        process->kill();
+        qDebug() << process->state();
+        qDebug() << "Operation::killProcess()";
     }
 
 };
