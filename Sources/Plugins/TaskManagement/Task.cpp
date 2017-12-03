@@ -9,23 +9,22 @@ Task::Task(const QString& name,
            const QStringList& arguments)
     : name(name), description(description)
 {
-    Operation operation(rawOperation, arguments);
+    Operation* operation = new Operation(rawOperation, arguments);
     operations.append(operation);
-    QProcess*& p = operation.process;
-    connect(p, &QProcess::readyReadStandardOutput, [=]() {
-        qDebug() << p->readAllStandardOutput().data();
+    connect(&operation->process, &QProcess::readyReadStandardOutput, [=]() {
+        qDebug() << operation->process.readAllStandardOutput().data();
     });
-    connect(p, &QProcess::stateChanged, [=]() {
-        qDebug() << p->state();
+    connect(&operation->process, &QProcess::stateChanged, [=]() {
+        qDebug() << operation->process.state();
         emit stateChanged();
     });
-    connect(p, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+    connect(&operation->process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
             [&](int code, QProcess::ExitStatus s) {
         qDebug() << code << " " << s;
         emit stateChanged();
     });
 
-    Trigger trigger(startTime, internalType, interval);
+    Trigger* trigger = new Trigger(startTime, internalType, interval);
     triggers.append(trigger);
 }
 

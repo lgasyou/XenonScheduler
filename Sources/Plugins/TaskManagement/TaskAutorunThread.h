@@ -6,6 +6,8 @@
 class Task;
 class TaskManager;
 
+// This thread keeps checking whether a task should be run every "checkInterval" second(s).
+// If a task should be run, emits signal "shouldStartTask(Task* task)".
 class TaskAutorunThread : public QThread {
     Q_OBJECT
 

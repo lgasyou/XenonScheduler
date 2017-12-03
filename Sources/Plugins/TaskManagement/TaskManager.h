@@ -51,12 +51,6 @@ public:
         manuallyStopped = true;
     }
 
-    // Duplicates basic infomations only,
-    // doesn't include its runtime state.
-    Task* duplicate(Task* rhs) {
-        return new Task(*rhs);
-    }
-
     void append(Task* task) {
         tasks.append(task);
         connectTaskSignal(task);

@@ -345,10 +345,10 @@ public:
         QGridLayout* layout = new QGridLayout();
         setLayout(layout);
         layout->addWidget(taskLabel, 0, 0);
-        layout->addWidget(taskEdit, 1, 0);
-        layout->addWidget(taskBrowser, 1, 1);
-        layout->addWidget(addArgLabel, 2, 0);
-        layout->addWidget(addArgEdit, 2, 1);
+        layout->addWidget(taskEdit, 1, 0, 1, 2);
+        layout->addWidget(taskBrowser, 1, 2, 1, 1);
+        layout->addWidget(addArgLabel, 2, 0, 1, 1);
+        layout->addWidget(addArgEdit, 2, 1, 1, 2);
 
         // TODO: recover to "task*" when release this program.
         registerField("task", taskEdit);

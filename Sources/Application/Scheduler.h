@@ -70,15 +70,6 @@ public slots:
         removeRow(current);
     }
 
-    void duplicateCurrentRow() {
-        int current = taskTable->currentRow();
-        if (current == -1) return;
-
-        Task* src = taskManager.get(current);
-        Task* copy = taskManager.duplicate(src);
-        insertRow(copy);
-    }
-
 private:
     void setupToolBar() {
         QAction* addAct = new QAction(QIcon(":/images/add.png"), "Add");
@@ -90,10 +81,6 @@ private:
         connect(removeAct, &QAction::triggered,
                 this,      &Scheduler::removeCurrentRow);
 
-        QAction* duplicateAct = new QAction(QIcon(":/images/copy.png"), "Duplicate");
-        connect(duplicateAct, &QAction::triggered,
-                this,         &Scheduler::duplicateCurrentRow);
-
         QAction* settingAct = new QAction(QIcon(":/images/set.png"), "General Settings");
         settingDialog = new GeneralSettingDialog(this);
         connect(settingAct, &QAction::triggered,
@@ -102,7 +89,6 @@ private:
         toolBar = addToolBar("Tool Bar");
         toolBar->addAction(addAct);
         toolBar->addAction(removeAct);
-        toolBar->addAction(duplicateAct);
         toolBar->addAction(settingAct);
     }
 

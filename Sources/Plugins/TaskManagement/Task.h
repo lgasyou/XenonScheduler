@@ -27,8 +27,8 @@ public:
     }
 
     void kill() {
-        for (Operation& op : operations) {
-            op.killActiveProcess();
+        for (Operation* op : operations) {
+            op->killActiveProcess();
         }
     }
 
@@ -40,13 +40,13 @@ public:
     // Priority: Running > Starting > Stopped.
     QString getState() const {
         int runningCnt = 0, startingCnt = 0, notRunningCnt = 0;
-        for (const Operation& op : operations) {
-            QProcess* p = op.process;
-            if (p->state() == QProcess::Running) {
+        for (Operation* op : operations) {
+            QProcess& p = op->process;
+            if (p.state() == QProcess::Running) {
                 ++runningCnt;
-            } else if (p->state() == QProcess::Starting) {
+            } else if (p.state() == QProcess::Starting) {
                 ++startingCnt;
-            } else if (p->state() == QProcess::NotRunning) {
+            } else if (p.state() == QProcess::NotRunning) {
                 ++notRunningCnt;
             }
         }
@@ -56,9 +56,9 @@ public:
     // Returns invalid QDateTime object if all triggers aren't periodic trigger.
     QDateTime getNextStartTime() const {
         QDateTime time;
-        for (const Trigger& t : triggers) {
-            if (t.isPeriodic()) {
-                time = time.isValid() ? std::min(time, t.nextStartTime) : t.nextStartTime;
+        for (Trigger* t : triggers) {
+            if (t->isPeriodic()) {
+                time = time.isValid() ? std::min(time, t->nextStartTime) : t->nextStartTime;
             }
         }
         return time;
@@ -88,30 +88,32 @@ private:
          const QString& operation,
          const QStringList& arguments);
 
-    Task(const Task& rhs)
-        : name(rhs.name),
-          description(rhs.description),
-          operations(rhs.operations),
-          triggers(rhs.triggers)
-    {}
+    Task(const Task& rhs) = delete;
+
+    ~Task() {
+        for (Trigger* t : triggers) {
+            delete t;
+        }
+        for (Operation* o : operations) {
+            delete o;
+        }
+    }
 
     void startOperations() {
-        for (Operation& op : operations) {
-            if (op.process->state() != QProcess::NotRunning) {
-                continue;
+        for (Operation* op : operations) {
+            if (op->process.state() == QProcess::NotRunning) {
+                QProcess& p = op->process;
+                p.setProgram(op->program);
+                p.setArguments(op->arguments);
+                p.start();
             }
-
-            QProcess*& p = op.process;
-            p->setProgram(op.program);
-            p->setArguments(op.arguments);
-            p->start();
         }
     }
 
     void updateTriggers() {
-        for (Trigger& t : triggers) {
-            if (t.triggered()) {
-                t.updateNextStartTime();
+        for (Trigger* t : triggers) {
+            if (t->triggered()) {
+                t->updateNextStartTime();
             }
         }
     }
@@ -119,8 +121,8 @@ private:
 private:
     QString name;
     QString description;
-    QVector<Operation> operations;
-    QVector<Trigger> triggers;
+    QVector<Operation*> operations;
+    QVector<Trigger*> triggers;
     QDateTime lastStartTime;
     QString lastRunResult;
 

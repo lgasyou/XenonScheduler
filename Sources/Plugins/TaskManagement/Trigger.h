@@ -25,7 +25,8 @@ public:
           interval(interval)
     {}
 
-    Trigger() = default;
+    Trigger(const Trigger& rhs) = delete;
+    ~Trigger() = default;
 
     bool triggered() const {
         return isPeriodic() && nextStartTime <= QDateTime::currentDateTime();
