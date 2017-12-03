@@ -100,6 +100,7 @@ private:
     void startOperations() {
         for (Operation* op : operations) {
             if (op->process.state() == QProcess::NotRunning) {
+                lastStartTime = QDateTime::currentDateTime();
                 QProcess& p = op->process;
                 p.setProgram(op->program);
                 p.setArguments(op->arguments);
@@ -111,12 +112,16 @@ private:
     }
 
     void updateTriggers() {
+        bool hasUpdated = false;
         for (Trigger* t : triggers) {
             if (t->triggered()) {
+                hasUpdated = true;
                 t->updateNextStartTime();
             }
         }
-        emit stateChanged();
+        if (hasUpdated) {
+            emit stateChanged();
+        }
     }
 
 private:

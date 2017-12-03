@@ -1,14 +1,16 @@
 #include "Scheduler.h"
 
 Scheduler::Scheduler(QWidget *parent) :
-    QMainWindow(parent)
+    QMainWindow(parent),
+    wizard(&taskManager, this),
+    systemTray(this)
 {
     setWindowTitle(kAppName);
     setWindowIcon(QIcon(":/images/task-management.png"));
     resize(900, 600);
 
     setupToolBar();
-    setupTaskTableWidget();
+    setupTaskTable();
     setupSystemTray();
 
     connect(&taskManager, &TaskManager::taskStateChanged,
@@ -17,9 +19,4 @@ Scheduler::Scheduler(QWidget *parent) :
 
 Scheduler::~Scheduler() {
     taskManager.stop();
-
-    systemTray->hide();
-    delete systemTray;
-    delete wizard;
-    delete settingDialog;
 }

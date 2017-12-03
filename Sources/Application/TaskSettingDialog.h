@@ -86,16 +86,18 @@ private:
         QTableWidget* table = new QTableWidget();
         table->setColumnCount(kTriggerTableLabels.size());
         table->setHorizontalHeaderLabels(kTriggerTableLabels);
+        table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
         table->verticalHeader()->hide();
         table->setSelectionBehavior(QTableWidget::SelectRows);
         table->setSelectionMode(QTableWidget::SingleSelection);
         table->setContextMenuPolicy(Qt::CustomContextMenu);
+        table->setEditTriggers(QTableWidget::NoEditTriggers);
         table->setSortingEnabled(true);
 
         QPushButton* newBtn = new QPushButton("New...");
         connect(newBtn, &QPushButton::clicked, [=]() {
             // TODO: Trigger setting.
-            int selected = table->currentRow();
+//            int selected = table->currentRow();
             TriggerSettingDialog* dialog = new TriggerSettingDialog(this);
             dialog->show();
         });
@@ -117,16 +119,18 @@ private:
         QTableWidget* table = new QTableWidget();
         table->setColumnCount(kTriggerTableLabels.size());
         table->setHorizontalHeaderLabels(kTriggerTableLabels);
+        table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
         table->verticalHeader()->hide();
         table->setSelectionBehavior(QTableWidget::SelectRows);
         table->setSelectionMode(QTableWidget::SingleSelection);
         table->setContextMenuPolicy(Qt::CustomContextMenu);
+        table->setEditTriggers(QTableWidget::NoEditTriggers);
         table->setSortingEnabled(true);
 
         QPushButton* newBtn = new QPushButton("New...");
         connect(newBtn, &QPushButton::clicked, [=]() {
             // TODO: operation setting.
-            int selected = table->currentRow();
+//            int selected = table->currentRow();
             OperationSettingDialog* dialog = new OperationSettingDialog(this);
             dialog->show();
         });
@@ -148,6 +152,7 @@ private:
         QTableWidget* table = new QTableWidget();
         table->setColumnCount(kJournalTableLabels.size());
         table->setHorizontalHeaderLabels(kJournalTableLabels);
+        table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
         table->verticalHeader()->hide();
         table->setRowCount(1);
 

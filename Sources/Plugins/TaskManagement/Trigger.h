@@ -38,17 +38,10 @@ public:
 
     void updateNextStartTime() {
         switch (intervalType) {
-        case Day:
-            nextStartTime = nextStartTime.addDays(interval);
-            break;
-        case Week:
-            nextStartTime = nextStartTime.addDays(7*interval);
-            break;
-        case Month:
-            nextStartTime = nextStartTime.addMonths(interval);
-            break;
-        default:
-            break;
+        case Day: nextStartTime = nextStartTime.addDays(interval); break;
+        case Week: nextStartTime = nextStartTime.addDays(7*interval); break;
+        case Month: nextStartTime = nextStartTime.addMonths(interval); break;
+        case Once: case StartingUp: case Login: default: break;
         }
     }
 

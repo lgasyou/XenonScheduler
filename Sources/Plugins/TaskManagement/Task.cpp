@@ -16,13 +16,14 @@ Task::Task(const QString& name,
     connect(&operation->process, &QProcess::readyReadStandardOutput, [=]() {
         qDebug() << operation->process.readAllStandardOutput().data();
     });
-    connect(&operation->process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-            [&](int code, QProcess::ExitStatus s) {
-        qDebug() << code << " " << s;
+    connect(&operation->process, QOverload<int>::of(&QProcess::finished), [&](int code) {
+        lastRunResult = QString::number(code);
+        emit stateChanged();
     });
     connect(&operation->process, &QProcess::stateChanged, [=]() {
-        qDebug() << operation->process.state();
-        emit stateChanged();
+        if (operation->process.state() != QProcess::NotRunning) {
+            emit stateChanged();
+        }
     });
 
     Trigger* trigger = new Trigger(startTime, internalType, interval);

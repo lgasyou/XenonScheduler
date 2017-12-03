@@ -15,11 +15,13 @@ TaskTableWidget::TaskTableWidget(TaskManager* taskManager, QWidget* parent)
 {
     setColumnCount(kTableLabels.size());
     setHorizontalHeaderLabels(kTableLabels);
+    horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     verticalHeader()->hide();
 
     setSelectionBehavior(QTableWidget::SelectRows);
     setSelectionMode(QTableWidget::SingleSelection);
     setContextMenuPolicy(Qt::CustomContextMenu);
+    setEditTriggers(QTableWidget::NoEditTriggers);
     setSortingEnabled(true);
 
     connect(this, &TaskTableWidget::customContextMenuRequested,

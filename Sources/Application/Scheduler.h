@@ -71,18 +71,16 @@ public slots:
 private:
     void setupToolBar() {
         QAction* addAct = new QAction(QIcon(":/images/add.png"), "Add");
-        wizard = new TaskCreationWizard(&taskManager, this);
         connect(addAct, &QAction::triggered,
-                wizard, &TaskCreationWizard::show);
+                &wizard, &TaskCreationWizard::show);
 
         QAction* removeAct = new QAction(QIcon(":/images/delete.png"), "Remove");
         connect(removeAct, &QAction::triggered,
                 this,      &Scheduler::removeCurrentRow);
 
         QAction* settingAct = new QAction(QIcon(":/images/set.png"), "General Settings");
-        settingDialog = new GeneralSettingDialog(this);
         connect(settingAct, &QAction::triggered,
-                settingDialog, &GeneralSettingDialog::show);
+                &settingDialog, &GeneralSettingDialog::show);
 
         toolBar = addToolBar("Tool Bar");
         toolBar->addAction(addAct);
@@ -90,26 +88,26 @@ private:
         toolBar->addAction(settingAct);
     }
 
-    void setupTaskTableWidget() {
+    void setupTaskTable() {
         QTableWidget* t = new TaskTableWidget(&taskManager);
         setCentralWidget(t);
         taskTable = t;
     }
 
     void setupSystemTray() {
-        QSystemTrayIcon* s = new QSystemTrayIcon(this);
-        s->setIcon(QIcon(":/images/task-management.png"));
-        s->setToolTip(kAppName);
-        s->show();
+        QSystemTrayIcon& s = systemTray;
+        s.setIcon(QIcon(":/images/task-management.png"));
+        s.setToolTip(kAppName);
+        s.show();
 
-        QAction* restoreWindowAct = new QAction("Restore Window", s);
+        QAction* restoreWindowAct = new QAction("Restore Window", &s);
         connect(restoreWindowAct, &QAction::triggered,
                 this, &Scheduler::show);
 
         // TODO: open at boot.
-        QAction* openAtBoot = new QAction("Open at boot", s);
+        QAction* openAtBoot = new QAction("Open at boot", &s);
 
-        QAction* quitAct = new QAction("Quit", s);
+        QAction* quitAct = new QAction("Quit", &s);
         connect(quitAct, &QAction::triggered,
                 qApp, &QApplication::quit);
 
@@ -118,25 +116,25 @@ private:
         menu->addSeparator();
         menu->addAction(openAtBoot);
         menu->addAction(quitAct);
-        s->setContextMenu(menu);
-        systemTray = s;
+        s.setContextMenu(menu);
     }
 
     // TODO: close or hide.
     // should remeber the choice.
     void closeEvent(QCloseEvent* e) override {
-        e->ignore();
-        hide();
-//        QMainWindow::closeEvent(e);
+//        e->ignore();
+//        hide();
+        QMainWindow::closeEvent(e);
     }
 
 private:
     TaskManager taskManager;
+    QSystemTrayIcon systemTray;
+    TaskCreationWizard wizard;
+    GeneralSettingDialog settingDialog;
+
     QToolBar* toolBar;
     QTableWidget* taskTable;
-    QSystemTrayIcon* systemTray;
-    TaskCreationWizard* wizard;
-    GeneralSettingDialog* settingDialog;
 
 };
 
