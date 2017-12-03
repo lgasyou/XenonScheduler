@@ -3,9 +3,14 @@
 
 #include <QDateTime>
 
+class Task;
+
 class Trigger {
+    friend QDataStream& operator<<(QDataStream&, const Trigger&);
+    friend QDataStream& operator>>(QDataStream&, Trigger&);
+
 public:
-    enum IntervalType : qint64 {
+    enum IntervalType : qint32 {
         Day,
         Week,
         Month,
@@ -25,6 +30,7 @@ public:
           interval(interval)
     {}
 
+    Trigger() = default;
     Trigger(const Trigger& rhs) = delete;
     ~Trigger() = default;
 

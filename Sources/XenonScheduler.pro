@@ -37,7 +37,8 @@ SOURCES += \
     Application/TriggerSettingDialog.cpp \
     Application/TaskCreationWizard.cpp \
     Application/OperationSettingDialog.cpp \
-    Application/TaskSettingDialog.cpp
+    Application/TaskSettingDialog.cpp \
+    Plugins/Persistence/TaskManagerSerializer.cpp
 
 HEADERS += \ 
     Application/GeneralSettingDialog.h \
@@ -52,7 +53,8 @@ HEADERS += \
     Application/TriggerSettingDialog.h \
     Application/TaskCreationWizard.h \
     Application/OperationSettingDialog.h \
-    Application/TaskSettingDialog.h
+    Application/TaskSettingDialog.h \
+    Plugins/Persistence/TaskManagerSerializer.h
 
 FORMS +=  
 

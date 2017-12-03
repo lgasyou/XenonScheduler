@@ -1,5 +1,7 @@
 #include "Task.h"
 
+static QString ProcessExitStatus2StringHelper(int code, QProcess::ExitStatus status);
+
 Task::Task(const QString& name,
            const QString& description,
            const QDateTime& startTime,
@@ -10,43 +12,29 @@ Task::Task(const QString& name,
     : name(name), description(description)
 {
     Operation* operation = new Operation(rawOperation, arguments);
-    operations.append(operation);
-    // Used when debugging
-    // TODO: use journal system catch the following two.
-    connect(&operation->process, &QProcess::readyReadStandardOutput, [=]() {
-        qDebug() << operation->process.readAllStandardOutput().data();
-    });
-    connect(&operation->process, QOverload<int>::of(&QProcess::finished), [&](int code) {
-        lastRunResult = QString::number(code);
-        emit stateChanged();
-    });
-    connect(&operation->process, &QProcess::stateChanged, [=]() {
-        if (operation->process.state() != QProcess::NotRunning) {
-            emit stateChanged();
-        }
-    });
+    addOperation(operation);
 
     Trigger* trigger = new Trigger(startTime, internalType, interval);
-    triggers.append(trigger);
+    addTrigger(trigger);
 }
 
-QString Task::getLastRunResult() const {
+const QVector<Operation*>& Task::getOperations() const {
+    return operations;
+}
+
+const QVector<Trigger*>& Task::getTriggers() const {
+    return triggers;
+}
+
+const QString& Task::getLastRunResult() const {
     return lastRunResult;
 }
 
-void Task::setLastRunResult(const QString& value) {
-    lastRunResult = value;
-}
-
-QDateTime Task::getLastStartTime() const {
+const QDateTime& Task::getLastStartTime() const {
     return lastStartTime;
 }
 
-void Task::setLastStartTime(const QDateTime& value) {
-    lastStartTime = value;
-}
-
-QString Task::getDescription() const {
+const QString& Task::getDescription() const {
     return description;
 }
 
@@ -54,10 +42,33 @@ void Task::setDescription(const QString& value) {
     description = value;
 }
 
-QString Task::getName() const {
+void Task::addOperation(Operation *operation) {
+    operations.append(operation);
+    // Used when debugging
+    // TODO: use journal system catch the following two.
+    connect(&operation->process, &QProcess::readyReadStandardOutput, [=]() {
+        qDebug() << operation->process.readAllStandardOutput().data();
+    });
+    connect(&operation->process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+            [=](int c, QProcess::ExitStatus s) {
+        lastRunResult = ::ProcessExitStatus2StringHelper(c, s);
+        emit stateChanged();
+    });
+    connect(&operation->process, &QProcess::stateChanged, [=]() {
+        if (operation->process.state() != QProcess::NotRunning) {
+            emit stateChanged();
+        }
+    });
+}
+
+const QString& Task::getName() const {
     return name;
 }
 
 void Task::setName(const QString& value) {
     name = value;
+}
+
+static QString ProcessExitStatus2StringHelper(int code, QProcess::ExitStatus status) {
+    return (status == 0 ? "Normal Exit" : "Crashed Exit") + QString(" (%1)").arg(code);
 }

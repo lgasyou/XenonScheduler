@@ -12,6 +12,8 @@ class TaskManager : public QObject {
     Q_OBJECT
 
     friend class TaskAutorunThread;
+    friend QDataStream& operator<<(QDataStream&, const TaskManager&);
+    friend QDataStream& operator>>(QDataStream&, TaskManager&);
 
 public:
     static Task* create(const QString& name,
@@ -24,7 +26,7 @@ public:
         return new Task(name, description, startTime, internalType, interval, operation, arguments);
     }
 
-    TaskManager(int checkInterval = 1);
+    TaskManager(qint64 checkInterval = 1);
     ~TaskManager() {
         autorunThread.terminate();
         for (Task* t : tasks) {
@@ -79,8 +81,8 @@ public:
         return tasks.size();
     }
 
-    int getCheckInterval() const;
-    void setCheckInterval(int value);
+    qint64 getCheckInterval() const;
+    void setCheckInterval(qint64 value);
 
 signals:
     void taskStateChanged(int index);
@@ -89,12 +91,13 @@ private:
     void connectTaskSignal(Task* task) {
         connect(task, &Task::stateChanged, [=]() {
             int index = indexOf(task);
+            qDebug() << task;
             emit taskStateChanged(index);
         });
     }
 
 private:
-    int checkInterval;
+    qint64 checkInterval;
     QVector<Task*> tasks;
     TaskAutorunThread autorunThread;
 

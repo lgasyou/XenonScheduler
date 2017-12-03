@@ -1,6 +1,6 @@
 #include "TaskManager.h"
 
-TaskManager::TaskManager(int checkInterval)
+TaskManager::TaskManager(qint64 checkInterval)
     : checkInterval(checkInterval),
       autorunThread(this)
 {
@@ -11,10 +11,10 @@ TaskManager::TaskManager(int checkInterval)
     autorunThread.start();
 }
 
-int TaskManager::getCheckInterval() const {
+qint64 TaskManager::getCheckInterval() const {
     return checkInterval;
 }
 
-void TaskManager::setCheckInterval(int value) {
+void TaskManager::setCheckInterval(qint64 value) {
     checkInterval = value;
 }

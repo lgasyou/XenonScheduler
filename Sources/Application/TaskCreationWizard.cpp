@@ -14,6 +14,7 @@
 #include "Scheduler.h"
 
 static void AddPagesHelper(TaskCreationWizard* wizard);
+// Returns <nextStartTime, intervalType, interval>
 static std::tuple<QDateTime, Trigger::IntervalType, int> GetExecuteTimeHelper(TaskCreationWizard* wizard);
 
 TaskCreationWizard::TaskCreationWizard(TaskManager* taskManager, Scheduler* scheduler)

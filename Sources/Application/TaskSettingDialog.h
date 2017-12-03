@@ -52,19 +52,7 @@ public:
     ~TaskSettingDialog() = default;
 
 private:
-    void showEvent(QShowEvent* e) override {
-        setWindowTitle(task->getName() + " - Properties");
-
-        nameEdit->setText(task->getName());
-        nameEdit->setDisabled(true);
-        locationEdit->setText("\\");
-        locationEdit->setDisabled(true);
-        briefEdit->setPlainText(task->getDescription());
-
-        // TODO: add triggers and operations.
-
-        QDialog::showEvent(e);
-    }
+    void showEvent(QShowEvent* e) override;
 
     void setupGeneralTab() {
         QWidget* w = new QWidget();
@@ -98,6 +86,7 @@ private:
         connect(newBtn, &QPushButton::clicked, [=]() {
             // TODO: Trigger setting.
 //            int selected = table->currentRow();
+//            Trigger* op = task->getTriggers()[selected];
             TriggerSettingDialog* dialog = new TriggerSettingDialog(this);
             dialog->show();
         });
@@ -113,12 +102,13 @@ private:
         l->addWidget(editBtn, 1, 1);
         l->addWidget(removeBtn, 1, 2);
         tabWidget->addTab(w, "Triggers");
+        triggerTable = table;
     }
 
     void setupOperationTab() {
         QTableWidget* table = new QTableWidget();
-        table->setColumnCount(kTriggerTableLabels.size());
-        table->setHorizontalHeaderLabels(kTriggerTableLabels);
+        table->setColumnCount(kOperationTableLabels.size());
+        table->setHorizontalHeaderLabels(kOperationTableLabels);
         table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
         table->verticalHeader()->hide();
         table->setSelectionBehavior(QTableWidget::SelectRows);
@@ -131,6 +121,7 @@ private:
         connect(newBtn, &QPushButton::clicked, [=]() {
             // TODO: operation setting.
 //            int selected = table->currentRow();
+//            Operation* op = task->getOperations()[selected];
             OperationSettingDialog* dialog = new OperationSettingDialog(this);
             dialog->show();
         });
@@ -145,7 +136,7 @@ private:
         l->addWidget(editBtn, 1, 1);
         l->addWidget(removeBtn, 1, 2);
         tabWidget->addTab(w, "Opertions");
-        triggerTable = table;
+        operationTable = table;
     }
 
     void setupJournalTab() {
@@ -160,7 +151,7 @@ private:
         QGridLayout* l = new QGridLayout(w);
         l->addWidget(table, 0, 0, 1, 3);
         tabWidget->addTab(w, "Journal");
-        operationTable = table;
+        journalTable = table;
     }
 
 private:
@@ -174,6 +165,7 @@ private:
 
     QTableWidget* triggerTable;
     QTableWidget* operationTable;
+    QTableWidget* journalTable;
 };
 
 #endif // TASKOPTIONDIALOG_H

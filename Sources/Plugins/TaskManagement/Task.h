@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QProcess>
 #include <QDateTime>
+#include <QMap>
 #include <QDebug>
 #include <algorithm>
 
@@ -18,6 +19,10 @@ class Task : public QObject {
     Q_OBJECT
 
     friend class TaskManager;
+    friend QDataStream& operator<<(QDataStream&, const TaskManager&);
+    friend QDataStream& operator>>(QDataStream&, TaskManager&);
+    friend QDataStream& operator<<(QDataStream&, const Task&);
+    friend QDataStream& operator>>(QDataStream&, Task&);
 
 public:
     void start() {
@@ -36,19 +41,19 @@ public:
         return nextStartTime.isValid() && nextStartTime <= QDateTime::currentDateTime();
     }
 
-    QString getState() const {
-        int runningCnt = 0, startingCnt = 0, notRunningCnt = 0;
+    void addOperation(Operation* operation);
+
+    void addTrigger(Trigger* trigger) {
+        triggers.append(trigger);
+    }
+
+    QMap<QProcess::ProcessState, int> getState() const {
+        QMap<QProcess::ProcessState, int> ret;
+        ret[QProcess::Running] = ret[QProcess::Starting] = ret[QProcess::NotRunning] = 0;
         for (Operation* op : operations) {
-            QProcess& p = op->process;
-            if (p.state() == QProcess::Running) {
-                ++runningCnt;
-            } else if (p.state() == QProcess::Starting) {
-                ++startingCnt;
-            } else if (p.state() == QProcess::NotRunning) {
-                ++notRunningCnt;
-            }
+            ++ret[op->process.state()];
         }
-        return QString("%1 Running, %2 Starting, %3 Not Running").arg(runningCnt).arg(startingCnt).arg(notRunningCnt);
+        return ret;
     }
 
     // Returns invalid QDateTime object if all triggers aren't periodic trigger.
@@ -62,17 +67,16 @@ public:
         return time;
     }
 
-    QString getName() const;
+    const QString& getName() const;
     void setName(const QString& value);
 
-    QString getDescription() const;
+    const QString& getDescription() const;
     void setDescription(const QString& value);
 
-    QDateTime getLastStartTime() const;
-    void setLastStartTime(const QDateTime& value);
-
-    QString getLastRunResult() const;
-    void setLastRunResult(const QString& value);
+    const QDateTime& getLastStartTime() const;
+    const QString& getLastRunResult() const;
+    const QVector<Operation*>& getOperations() const;
+    const QVector<Trigger*>& getTriggers() const;
 
 signals:
     void stateChanged();
@@ -86,6 +90,7 @@ private:
          const QString& operation,
          const QStringList& arguments);
 
+    Task() = default;
     Task(const Task& rhs) = delete;
 
     ~Task() {
@@ -127,8 +132,8 @@ private:
 private:
     QString name;
     QString description;
-    QVector<Operation*> operations;
     QVector<Trigger*> triggers;
+    QVector<Operation*> operations;
     QDateTime lastStartTime;
     QString lastRunResult;
 
