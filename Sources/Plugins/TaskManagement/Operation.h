@@ -24,8 +24,7 @@ public:
 
     void killActiveProcess() {
         process.kill();
-        qDebug() << process.state();
-        qDebug() << "Operation::killProcess()";
+        qDebug() << "Operation::killActiveProcess()";
     }
 
 };

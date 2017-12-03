@@ -18,6 +18,7 @@
 #include "TaskSettingDialog.h"
 #include "TaskTableWidget.h"
 #include "GeneralSettingDialog.h"
+#include "QuitOrHideDialog.h"
 
 class Scheduler : public QMainWindow {
     Q_OBJECT
@@ -35,31 +36,9 @@ public:
 
 public slots:
     // if index is -1, then add at the last position.
-    void insertRow(Task* task, int index = -1) {
-        QTableWidget* t = taskTable;
-        if (index == -1) {
-            index = t->rowCount();
-        }
+    void insertRow(Task* task, int index = -1);
 
-        t->insertRow(index);
-        taskManager.insert(task, index);
-
-        t->setItem(index, 0, new QTableWidgetItem(task->getName()));
-        t->setItem(index, 1, new QTableWidgetItem(task->getState()));
-        t->setItem(index, 2, new QTableWidgetItem(task->getNextStartTime().toString()));
-        t->setItem(index, 3, new QTableWidgetItem(task->getLastStartTime().toString()));
-        t->setItem(index, 4, new QTableWidgetItem(task->getLastRunResult()));
-    }
-
-    void updateRow(int index) {
-        qDebug() << "Scheduler::updateRow(int)";
-        Task* task = taskManager.get(index);
-        taskTable->setItem(index, 0, new QTableWidgetItem(task->getName()));
-        taskTable->setItem(index, 1, new QTableWidgetItem(task->getState()));
-        taskTable->setItem(index, 2, new QTableWidgetItem(task->getNextStartTime().toString()));
-        taskTable->setItem(index, 3, new QTableWidgetItem(task->getLastStartTime().toString()));
-        taskTable->setItem(index, 4, new QTableWidgetItem(task->getLastRunResult()));
-    }
+    void updateRow(int index);
 
     void removeCurrentRow() {
         int current = taskTable->currentRow();
@@ -96,13 +75,15 @@ private:
 
     void setupSystemTray() {
         QSystemTrayIcon& s = systemTray;
-        s.setIcon(QIcon(":/images/task-management.png"));
+        connect(&s,     &QSystemTrayIcon::activated,
+                this,   &Scheduler::onSystemTrayActivated);
+        s.setIcon(QIcon(":/images/scheduler.png"));
         s.setToolTip(kAppName);
         s.show();
 
         QAction* restoreWindowAct = new QAction("Restore Window", &s);
-        connect(restoreWindowAct, &QAction::triggered,
-                this, &Scheduler::show);
+        connect(restoreWindowAct,   &QAction::triggered,
+                this,               &Scheduler::showNormal);
 
         // TODO: open at boot.
         QAction* openAtBoot = new QAction("Open at boot", &s);
@@ -122,9 +103,31 @@ private:
     // TODO: close or hide.
     // should remeber the choice.
     void closeEvent(QCloseEvent* e) override {
-//        e->ignore();
-//        hide();
-        QMainWindow::closeEvent(e);
+//        QuitOrHideDialog dialog;
+
+//        int retCode = dialog.exec();
+//        if (retCode == QDialog::Accepted) {
+//            e->accept();
+//        } else if (retCode == QDialog::Rejected) {
+//            e->ignore();
+//            hide();
+//        } else {
+//            e->ignore();
+//        }
+
+        e->accept();
+    }
+
+private slots:
+    void onSystemTrayActivated(QSystemTrayIcon::ActivationReason reason) {
+        switch (reason) {
+        case QSystemTrayIcon::Trigger:
+            showNormal();
+            break;
+
+        default:
+            break;
+        }
     }
 
 private:
