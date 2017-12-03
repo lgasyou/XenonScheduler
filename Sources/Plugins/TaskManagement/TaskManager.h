@@ -26,11 +26,11 @@ public:
 
     TaskManager(int checkInterval = 1);
     ~TaskManager() {
+        autorunThread.terminate();
         for (Task* t : tasks) {
             t->kill();
             delete t;
         }
-        autorunThread.terminate();
     }
 
     void startTaskAt(int index) {

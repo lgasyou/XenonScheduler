@@ -9,17 +9,15 @@
 #include <QMenu>
 #include <QPushButton>
 #include <QHeaderView>
+#include <QMessageBox>
+#include <QApplication>
 #include <QDebug>
 
 #include "Plugins/TaskManagement/TaskManager.h"
-#include "CreateTaskWizard.h"
-#include "GeneralSettingDialog.h"
-#include "TaskOptionDialog.h"
+#include "TaskCreationWizard.h"
+#include "TaskSettingDialog.h"
 #include "TaskTableWidget.h"
-
-namespace Ui {
-class Scheduler;
-}
+#include "GeneralSettingDialog.h"
 
 class Scheduler : public QMainWindow {
     Q_OBJECT
@@ -73,9 +71,9 @@ public slots:
 private:
     void setupToolBar() {
         QAction* addAct = new QAction(QIcon(":/images/add.png"), "Add");
-        wizard = new CreateTaskWizard(&taskManager, this);
+        wizard = new TaskCreationWizard(&taskManager, this);
         connect(addAct, &QAction::triggered,
-                wizard, &CreateTaskWizard::show);
+                wizard, &TaskCreationWizard::show);
 
         QAction* removeAct = new QAction(QIcon(":/images/delete.png"), "Remove");
         connect(removeAct, &QAction::triggered,
@@ -105,10 +103,20 @@ private:
         s->show();
 
         QAction* restoreWindowAct = new QAction("Restore Window", s);
+        connect(restoreWindowAct, &QAction::triggered,
+                this, &Scheduler::show);
+
+        // TODO: open at boot.
+        QAction* openAtBoot = new QAction("Open at boot", s);
+
         QAction* quitAct = new QAction("Quit", s);
+        connect(quitAct, &QAction::triggered,
+                qApp, &QApplication::quit);
 
         QMenu* menu = new QMenu();
         menu->addAction(restoreWindowAct);
+        menu->addSeparator();
+        menu->addAction(openAtBoot);
         menu->addAction(quitAct);
         s->setContextMenu(menu);
         systemTray = s;
@@ -117,7 +125,9 @@ private:
     // TODO: close or hide.
     // should remeber the choice.
     void closeEvent(QCloseEvent* e) override {
-        QMainWindow::closeEvent(e);
+        e->ignore();
+        hide();
+//        QMainWindow::closeEvent(e);
     }
 
 private:
@@ -125,7 +135,7 @@ private:
     QToolBar* toolBar;
     QTableWidget* taskTable;
     QSystemTrayIcon* systemTray;
-    CreateTaskWizard* wizard;
+    TaskCreationWizard* wizard;
     GeneralSettingDialog* settingDialog;
 
 };

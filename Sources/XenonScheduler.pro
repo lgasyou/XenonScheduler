@@ -24,45 +24,37 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \ 
-    Application/CreateOperationDialog.cpp \
-    Application/CreateTaskWizard.cpp \
-    Application/CreateTriggerDialog.cpp \
-    Application/EditOperationDialog.cpp \
-    Application/EditTriggerDialog.cpp \
     Application/GeneralSettingDialog.cpp \
     Application/main.cpp \
     Application/Scheduler.cpp \
-    Application/TaskOptionDialog.cpp \
     Application/TaskTableWidget.cpp \
     Plugins/TaskManagement/Operation.cpp \
     Plugins/TaskManagement/Task.cpp \
     Plugins/TaskManagement/TaskManager.cpp \
     Plugins/TaskManagement/Trigger.cpp \
-    Plugins/TaskManagement/TaskAutorunThread.cpp
+    Plugins/TaskManagement/TaskAutorunThread.cpp \
+    Application/QuitOrHideDialog.cpp \
+    Application/TriggerSettingDialog.cpp \
+    Application/TaskCreationWizard.cpp \
+    Application/OperationSettingDialog.cpp \
+    Application/TaskSettingDialog.cpp
 
 HEADERS += \ 
-    Application/CreateOperationDialog.h \
-    Application/CreateTaskWizard.h \
-    Application/CreateTriggerDialog.h \
-    Application/EditOperationDialog.h \
-    Application/EditTriggerDialog.h \
     Application/GeneralSettingDialog.h \
     Application/Scheduler.h \
-    Application/TaskOptionDialog.h \
     Application/TaskTableWidget.h \
     Plugins/TaskManagement/Operation.h \
     Plugins/TaskManagement/Task.h \
     Plugins/TaskManagement/TaskManager.h \
     Plugins/TaskManagement/Trigger.h \
-    Plugins/TaskManagement/TaskAutorunThread.h
+    Plugins/TaskManagement/TaskAutorunThread.h \
+    Application/QuitOrHideDialog.h \
+    Application/TriggerSettingDialog.h \
+    Application/TaskCreationWizard.h \
+    Application/OperationSettingDialog.h \
+    Application/TaskSettingDialog.h
 
-FORMS += \ 
-    Application/CreateOperationDialog.ui \
-    Application/CreateTriggerDialog.ui \
-    Application/EditOperationDialog.ui \
-    Application/EditTriggerDialog.ui \
-    Application/GeneralSettingDialog.ui \
-    Application/TaskOptionDialog.ui
+FORMS +=  
 
 RESOURCES += \
     Application/Resources/AppResource.qrc

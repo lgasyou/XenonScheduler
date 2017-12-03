@@ -1,4 +1,4 @@
-#include "CreateTaskWizard.h"
+#include "TaskCreationWizard.h"
 
 #include <QGridLayout>
 #include <QLabel>
@@ -13,10 +13,10 @@
 
 #include "Scheduler.h"
 
-static void AddPagesHelper(CreateTaskWizard* wizard);
-static std::tuple<QDateTime, Trigger::IntervalType, int> GetExecuteTimeHelper(CreateTaskWizard* wizard);
+static void AddPagesHelper(TaskCreationWizard* wizard);
+static std::tuple<QDateTime, Trigger::IntervalType, int> GetExecuteTimeHelper(TaskCreationWizard* wizard);
 
-CreateTaskWizard::CreateTaskWizard(TaskManager* taskManager, Scheduler* scheduler)
+TaskCreationWizard::TaskCreationWizard(TaskManager* taskManager, Scheduler* scheduler)
     : QWizard(scheduler),
       taskManager(taskManager),
       scheduler(scheduler)
@@ -26,7 +26,7 @@ CreateTaskWizard::CreateTaskWizard(TaskManager* taskManager, Scheduler* schedule
     ::AddPagesHelper(this);
 }
 
-void CreateTaskWizard::accept() {
+void TaskCreationWizard::accept() {
     QString name = field("name").toString();
     QString brief = field("brief").toString();
     QString opertion = field("task").toString();
@@ -102,22 +102,22 @@ public:
 private:
     int nextId() const override {
         if (dailyBtn->isChecked()) {
-            return CreateTaskWizard::DailyTriggerPage;
+            return TaskCreationWizard::DailyTriggerPage;
         }
         if (weeklyBtn->isChecked()) {
-            return CreateTaskWizard::WeeklyTriggerPage;
+            return TaskCreationWizard::WeeklyTriggerPage;
         }
         if (monthlyBtn->isChecked()) {
-            return CreateTaskWizard::MonthlyTriggerPage;
+            return TaskCreationWizard::MonthlyTriggerPage;
         }
         if (onceBtn->isChecked()) {
-            return CreateTaskWizard::OnceTriggerPage;
+            return TaskCreationWizard::OnceTriggerPage;
         }
         if (startingUpBtn->isChecked()) {
-            return CreateTaskWizard::StartingUpTriggerPage;
+            return TaskCreationWizard::StartingUpTriggerPage;
         }
         if (loginBtn->isChecked()) {
-            return CreateTaskWizard::LoginTriggerPage;
+            return TaskCreationWizard::LoginTriggerPage;
         }
         throw std::exception("Unreachable");
     }
@@ -160,7 +160,7 @@ public:
 
 private:
     int nextId() const override {
-        return CreateTaskWizard::OperationPage;
+        return TaskCreationWizard::OperationPage;
     }
 
 };
@@ -193,7 +193,7 @@ public:
 
 private:
     int nextId() const override {
-        return CreateTaskWizard::OperationPage;
+        return TaskCreationWizard::OperationPage;
     }
 
 };
@@ -226,7 +226,7 @@ public:
 
 private:
     int nextId() const override {
-        return CreateTaskWizard::OperationPage;
+        return TaskCreationWizard::OperationPage;
     }
 
 };
@@ -251,7 +251,7 @@ public:
 
 private:
     int nextId() const override {
-        return CreateTaskWizard::OperationPage;
+        return TaskCreationWizard::OperationPage;
     }
 
 };
@@ -284,7 +284,7 @@ public:
 
 private:
     int nextId() const override {
-        return CreateTaskWizard::OperationPage;
+        return TaskCreationWizard::OperationPage;
     }
 
 };
@@ -317,7 +317,7 @@ public:
 
 private:
     int nextId() const override {
-        return CreateTaskWizard::OperationPage;
+        return TaskCreationWizard::OperationPage;
     }
 
 };
@@ -421,7 +421,7 @@ private:
 };
 
 
-static inline void AddPagesHelper(CreateTaskWizard* wizard) {
+static inline void AddPagesHelper(TaskCreationWizard* wizard) {
     wizard->addPage(new BasicPage());
     wizard->addPage(new SelectingTriggerPage());
     wizard->addPage(new DailyTriggerPage());
@@ -435,7 +435,7 @@ static inline void AddPagesHelper(CreateTaskWizard* wizard) {
 }
 
 
-static std::tuple<QDateTime, Trigger::IntervalType, int> GetExecuteTimeHelper(CreateTaskWizard* wizard) {
+static std::tuple<QDateTime, Trigger::IntervalType, int> GetExecuteTimeHelper(TaskCreationWizard* wizard) {
     if (wizard->field("day").toBool()) {
         QDateTime startTime = wizard->field("dailyStartTime").toDateTime();
         int interval = wizard->field("everyNDays").toInt();

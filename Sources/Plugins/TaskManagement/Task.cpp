@@ -11,16 +11,17 @@ Task::Task(const QString& name,
 {
     Operation* operation = new Operation(rawOperation, arguments);
     operations.append(operation);
+    // Used when debugging
+    // TODO: use journal system catch the following two.
     connect(&operation->process, &QProcess::readyReadStandardOutput, [=]() {
         qDebug() << operation->process.readAllStandardOutput().data();
-    });
-    connect(&operation->process, &QProcess::stateChanged, [=]() {
-        qDebug() << operation->process.state();
-        emit stateChanged();
     });
     connect(&operation->process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
             [&](int code, QProcess::ExitStatus s) {
         qDebug() << code << " " << s;
+    });
+    connect(&operation->process, &QProcess::stateChanged, [=]() {
+        qDebug() << operation->process.state();
         emit stateChanged();
     });
 

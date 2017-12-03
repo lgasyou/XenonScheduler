@@ -7,18 +7,18 @@
 #include <QPlainTextEdit>
 #include <QHeaderView>
 #include <QTableWidget>
+#include <QTabWidget>
 #include <QPushButton>
 #include <QStringList>
+#include <QGridLayout>
+#include <QHBoxLayout>
 #include <QDebug>
 
-#include "ui_TaskOptionDialog.h"
 #include "Plugins/TaskManagement/Task.h"
+#include "OperationSettingDialog.h"
+#include "TriggerSettingDialog.h"
 
-namespace Ui {
-class TaskOptionDialog;
-}
-
-class TaskOptionDialog : public QDialog {
+class TaskSettingDialog : public QDialog {
     Q_OBJECT
 
     const QStringList kTriggerTableLabels = {
@@ -32,12 +32,16 @@ class TaskOptionDialog : public QDialog {
     };
 
 public:
-    explicit TaskOptionDialog::TaskOptionDialog(QWidget *parent = 0) :
+    explicit TaskSettingDialog::TaskSettingDialog(Task* task, QWidget *parent = 0) :
         QDialog(parent),
-        ui(new Ui::TaskOptionDialog)
+        task(task),
+        tabWidget(new QTabWidget())
     {
-        ui->setupUi(this);
         resize(800, 600);
+        setAttribute(Qt::WA_DeleteOnClose);
+
+        QHBoxLayout* layout = new QHBoxLayout(this);
+        layout->addWidget(tabWidget);
 
         setupGeneralTab();
         setupTriggerTab();
@@ -45,12 +49,10 @@ public:
         setupJournalTab();
     }
 
-    ~TaskOptionDialog() {
-        delete ui;
-    }
+    ~TaskSettingDialog() = default;
 
-public slots:
-    void showWithTaskOptions(Task* task) {
+private:
+    void showEvent(QShowEvent* e) override {
         setWindowTitle(task->getName() + " - Properties");
 
         nameEdit->setText(task->getName());
@@ -61,15 +63,13 @@ public slots:
 
         // TODO: add triggers and operations.
 
-        show();
+        QDialog::showEvent(e);
     }
 
-private:
     void setupGeneralTab() {
         QWidget* w = new QWidget();
-        QGridLayout* l = new QGridLayout();
-        w->setLayout(l);
-        ui->tabWidget->addTab(w, "General");
+        QGridLayout* l = new QGridLayout(w);
+        tabWidget->addTab(w, "General");
 
         l->addWidget(new QLabel("Name:"), 0, 0);
         nameEdit = new QLineEdit();
@@ -87,41 +87,60 @@ private:
         table->setColumnCount(kTriggerTableLabels.size());
         table->setHorizontalHeaderLabels(kTriggerTableLabels);
         table->verticalHeader()->hide();
-        table->setRowCount(1);
+        table->setSelectionBehavior(QTableWidget::SelectRows);
+        table->setSelectionMode(QTableWidget::SingleSelection);
+        table->setContextMenuPolicy(Qt::CustomContextMenu);
+        table->setSortingEnabled(true);
 
         QPushButton* newBtn = new QPushButton("New...");
+        connect(newBtn, &QPushButton::clicked, [=]() {
+            // TODO: Trigger setting.
+            int selected = table->currentRow();
+            TriggerSettingDialog* dialog = new TriggerSettingDialog(this);
+            dialog->show();
+        });
+
         QPushButton* editBtn = new QPushButton("Edit...");
+
         QPushButton* removeBtn = new QPushButton("Remove...");
 
         QWidget* w = new QWidget();
-        QGridLayout* l = new QGridLayout();
+        QGridLayout* l = new QGridLayout(w);
         l->addWidget(table, 0, 0, 1, 6);
         l->addWidget(newBtn, 1, 0);
         l->addWidget(editBtn, 1, 1);
         l->addWidget(removeBtn, 1, 2);
-        w->setLayout(l);
-        ui->tabWidget->addTab(w, "Triggers");
+        tabWidget->addTab(w, "Triggers");
     }
 
     void setupOperationTab() {
         QTableWidget* table = new QTableWidget();
-        table->setColumnCount(kOperationTableLabels.size());
-        table->setHorizontalHeaderLabels(kOperationTableLabels);
+        table->setColumnCount(kTriggerTableLabels.size());
+        table->setHorizontalHeaderLabels(kTriggerTableLabels);
         table->verticalHeader()->hide();
-        table->setRowCount(1);
+        table->setSelectionBehavior(QTableWidget::SelectRows);
+        table->setSelectionMode(QTableWidget::SingleSelection);
+        table->setContextMenuPolicy(Qt::CustomContextMenu);
+        table->setSortingEnabled(true);
 
         QPushButton* newBtn = new QPushButton("New...");
+        connect(newBtn, &QPushButton::clicked, [=]() {
+            // TODO: operation setting.
+            int selected = table->currentRow();
+            OperationSettingDialog* dialog = new OperationSettingDialog(this);
+            dialog->show();
+        });
+
         QPushButton* editBtn = new QPushButton("Edit...");
         QPushButton* removeBtn = new QPushButton("Remove...");
 
         QWidget* w = new QWidget();
-        QGridLayout* l = new QGridLayout();
+        QGridLayout* l = new QGridLayout(w);
         l->addWidget(table, 0, 0, 1, 6);
         l->addWidget(newBtn, 1, 0);
         l->addWidget(editBtn, 1, 1);
         l->addWidget(removeBtn, 1, 2);
-        w->setLayout(l);
-        ui->tabWidget->addTab(w, "Opertions");
+        tabWidget->addTab(w, "Opertions");
         triggerTable = table;
     }
 
@@ -133,20 +152,16 @@ private:
         table->setRowCount(1);
 
         QWidget* w = new QWidget();
-        QGridLayout* l = new QGridLayout();
+        QGridLayout* l = new QGridLayout(w);
         l->addWidget(table, 0, 0, 1, 3);
-        w->setLayout(l);
-        ui->tabWidget->addTab(w, "Journal");
+        tabWidget->addTab(w, "Journal");
         operationTable = table;
     }
 
-    void closeEvent(QCloseEvent* event) override {
-        deleteLater();
-        QDialog::closeEvent(event);
-    }
-
 private:
-    Ui::TaskOptionDialog *ui;
+    Task* task;
+
+    QTabWidget* tabWidget;
 
     QLineEdit* nameEdit;
     QLineEdit* locationEdit;

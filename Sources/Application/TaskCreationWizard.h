@@ -9,7 +9,7 @@
 
 class Scheduler;
 
-class CreateTaskWizard : public QWizard {
+class TaskCreationWizard : public QWizard {
 public:
     enum PageId {
         BasicPage,
@@ -24,7 +24,7 @@ public:
         FinishingPage,
     };
 
-    CreateTaskWizard(TaskManager* taskManager, Scheduler* scheduler = 0);
+    TaskCreationWizard(TaskManager* taskManager, Scheduler* scheduler = 0);
 
 private:
     void accept() override;

@@ -1,14 +1,12 @@
 #include "GeneralSettingDialog.h"
-#include "ui_GeneralSettingDialog.h"
 
 GeneralSettingDialog::GeneralSettingDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::GeneralSettingDialog)
+    QDialog(parent)
 {
-    ui->setupUi(this);
     setWindowTitle("General Settings");
+    resize(800, 600);
 }
 
 GeneralSettingDialog::~GeneralSettingDialog() {
-    delete ui;
+
 }

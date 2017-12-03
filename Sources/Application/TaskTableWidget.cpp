@@ -7,7 +7,7 @@
 #include <QDebug>
 
 #include "Plugins/TaskManagement/TaskManager.h"
-#include "TaskOptionDialog.h"
+#include "TaskSettingDialog.h"
 
 TaskTableWidget::TaskTableWidget(TaskManager* taskManager, QWidget* parent)
     : QTableWidget(parent),
@@ -37,8 +37,8 @@ TaskTableWidget::TaskTableWidget(TaskManager* taskManager, QWidget* parent)
             [=]() { taskManager->stopTaskAt(rowClicked); });
     connect(showOptionAct, &QAction::triggered, [=]() {
         Task* task = taskManager->get(rowClicked);
-        TaskOptionDialog* dialog = new TaskOptionDialog(this);
-        dialog->showWithTaskOptions(task);
+        TaskSettingDialog* dialog = new TaskSettingDialog(task, this);
+        dialog->show();
     });
 }
 

@@ -23,7 +23,6 @@ public:
     void start() {
         startOperations();
         updateTriggers();
-        emit stateChanged();
     }
 
     void kill() {
@@ -37,7 +36,6 @@ public:
         return nextStartTime.isValid() && nextStartTime <= QDateTime::currentDateTime();
     }
 
-    // Priority: Running > Starting > Stopped.
     QString getState() const {
         int runningCnt = 0, startingCnt = 0, notRunningCnt = 0;
         for (Operation* op : operations) {
@@ -106,6 +104,8 @@ private:
                 p.setProgram(op->program);
                 p.setArguments(op->arguments);
                 p.start();
+            } else {
+                qDebug() << "Cannot start because this operation has been actived already!";
             }
         }
     }
@@ -116,6 +116,7 @@ private:
                 t->updateNextStartTime();
             }
         }
+        emit stateChanged();
     }
 
 private:

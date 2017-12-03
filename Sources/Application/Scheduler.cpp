@@ -18,6 +18,7 @@ Scheduler::Scheduler(QWidget *parent) :
 Scheduler::~Scheduler() {
     taskManager.stop();
 
+    systemTray->hide();
     delete systemTray;
     delete wizard;
     delete settingDialog;
