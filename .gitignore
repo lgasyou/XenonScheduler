@@ -1,5 +1,4 @@
 # C++ objects and libs
-/binary
 *.slo
 *.lo
 *.o
@@ -37,3 +36,5 @@ Makefile*
 # QtCtreator CMake
 CMakeLists.txt.user*
 
+# Binary files
+/binary
