@@ -1,0 +1,22 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>add.png</file>
+        <file>all.png</file>
+        <file>back.png</file>
+        <file>category.png</file>
+        <file>close.png</file>
+        <file>code.png</file>
+        <file>copy.png</file>
+        <file>delete.png</file>
+        <file>edit.png</file>
+        <file>folder.png</file>
+        <file>refresh.png</file>
+        <file>selected.png</file>
+        <file>set.png</file>
+        <file>subtract.png</file>
+        <file>success.png</file>
+        <file>task-management.png</file>
+        <file>warning.png</file>
+        <file>scheduler.png</file>
+    </qresource>
+</RCC>
