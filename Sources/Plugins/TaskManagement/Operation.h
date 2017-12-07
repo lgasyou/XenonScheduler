@@ -30,7 +30,6 @@ public:
 
     void killActiveProcess() {
         process.kill();
-        qDebug() << "Operation::killActiveProcess()";
     }
 
 };

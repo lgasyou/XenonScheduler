@@ -13,7 +13,6 @@
 #include <QApplication>
 #include <QDebug>
 
-#include "Plugins/Persistence/TaskManagerSerializer.h"
 #include "Plugins/TaskManagement/TaskManager.h"
 #include "TaskCreationWizard.h"
 #include "TaskSettingDialog.h"
@@ -142,7 +141,6 @@ private slots:
 
 private:
     TaskManager taskManager;
-    TaskManagerSerializer serializer;
 
     QSystemTrayIcon systemTray;
     TaskCreationWizard wizard;

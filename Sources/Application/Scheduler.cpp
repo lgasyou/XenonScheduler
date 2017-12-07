@@ -1,5 +1,7 @@
 #include "Scheduler.h"
 
+#include "Plugins/Persistence/TaskManagerSerializer.h"
+
 static QString ProcessState2StringHelper(const QMap<QProcess::ProcessState, int>& states);
 
 Scheduler::Scheduler(QWidget *parent) :
@@ -17,13 +19,13 @@ Scheduler::Scheduler(QWidget *parent) :
 
     connect(&taskManager, &TaskManager::taskStateChanged,
             this,         &Scheduler::updateRow);
-    serializer.deserialize(taskManager);
+    TaskManagerSerializer().deserialize(taskManager);
     loadTasksFromTaskManager();
 }
 
 Scheduler::~Scheduler() {
     taskManager.stop();
-    serializer.serialize(taskManager);
+    TaskManagerSerializer().serialize(taskManager);
 }
 
 void Scheduler::insertRow(Task *task, int index) {

@@ -26,6 +26,7 @@ void TaskSettingDialog::updateTriggerTable() {
         triggerTable->setItem(i, 1, new QTableWidgetItem(QString("Every %1").arg(t->interval)));
         triggerTable->setItem(i, 2, new QTableWidgetItem("Activated"));
     }
+    triggerTable->selectRow(0);
 }
 
 void TaskSettingDialog::updateOperationTable() {
@@ -36,6 +37,7 @@ void TaskSettingDialog::updateOperationTable() {
         operationTable->setItem(i, 0, new QTableWidgetItem(o->program));
         operationTable->setItem(i, 1, new QTableWidgetItem(o->arguments.join(' ')));
     }
+    operationTable->selectRow(0);
 }
 
 static inline QString IntervalType2StringHelper(Trigger::IntervalType type) {

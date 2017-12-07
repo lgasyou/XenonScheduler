@@ -87,6 +87,7 @@ private:
             TriggerSettingDialog* dialog = new TriggerSettingDialog(nullptr, this);
             if (dialog->exec() == QDialog::Accepted) {
                 updateTriggerTable();
+                delete dialog;
             }
         });
 
@@ -98,6 +99,7 @@ private:
                 TriggerSettingDialog* dialog = new TriggerSettingDialog(trigger, this);
                 if (dialog->exec() == QDialog::Accepted) {
                     updateTriggerTable();
+                    delete dialog;
                 }
             }
         });
@@ -137,7 +139,10 @@ private:
         connect(newBtn, &QPushButton::clicked, [=]() {
             OperationSettingDialog* dialog = new OperationSettingDialog(nullptr, this);
             if (dialog->exec() == QDialog::Accepted) {
+                Operation* newOp = dialog->getOperation();
+                task->addOperation(newOp);
                 updateOperationTable();
+                delete dialog;
             }
         });
 
@@ -149,6 +154,7 @@ private:
                 OperationSettingDialog* dialog = new OperationSettingDialog(op, this);
                 if (dialog->exec() == QDialog::Accepted) {
                     updateOperationTable();
+                    delete dialog;
                 }
             }
         });

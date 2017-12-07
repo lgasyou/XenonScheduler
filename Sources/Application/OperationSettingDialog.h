@@ -12,6 +12,10 @@ public:
     explicit OperationSettingDialog(Operation* op, QWidget *parent = 0);
     ~OperationSettingDialog();
 
+    Operation* getOperation() const {
+        return operation;
+    }
+
 private:
     void setupAsCreationDialog();
 

@@ -10,7 +10,11 @@ class TriggerSettingDialog : public QDialog {
 
 public:
     explicit TriggerSettingDialog(Trigger* trigger, QWidget *parent = 0);
-    ~TriggerSettingDialog();
+    ~TriggerSettingDialog() {}
+
+    Trigger* getTrigger() const {
+        return trigger;
+    }
 
 private:
     void setupAsCreationDialog();
