@@ -84,16 +84,32 @@ private:
 
         QPushButton* newBtn = new QPushButton("New...");
         connect(newBtn, &QPushButton::clicked, [=]() {
-            // TODO: Trigger setting.
-//            int selected = table->currentRow();
-//            Trigger* op = task->getTriggers()[selected];
-            TriggerSettingDialog* dialog = new TriggerSettingDialog(this);
-            dialog->show();
+            TriggerSettingDialog* dialog = new TriggerSettingDialog(nullptr, this);
+            if (dialog->exec() == QDialog::Accepted) {
+                updateTriggerTable();
+            }
         });
 
         QPushButton* editBtn = new QPushButton("Edit...");
+        connect(editBtn, &QPushButton::clicked, [=]() {
+            int selected = table->currentRow();
+            if (selected != -1) {
+                Trigger* trigger = task->getTriggerAt(selected);
+                TriggerSettingDialog* dialog = new TriggerSettingDialog(trigger, this);
+                if (dialog->exec() == QDialog::Accepted) {
+                    updateTriggerTable();
+                }
+            }
+        });
 
         QPushButton* removeBtn = new QPushButton("Remove...");
+        connect(removeBtn, &QPushButton::clicked, [=]() {
+            int selected = table->currentRow();
+            if (selected != -1) {
+                task->removeTriggerAt(selected);
+                updateTriggerTable();
+            }
+        });
 
         QWidget* w = new QWidget();
         QGridLayout* l = new QGridLayout(w);
@@ -119,15 +135,32 @@ private:
 
         QPushButton* newBtn = new QPushButton("New...");
         connect(newBtn, &QPushButton::clicked, [=]() {
-            // TODO: operation setting.
-//            int selected = table->currentRow();
-//            Operation* op = task->getOperations()[selected];
-            OperationSettingDialog* dialog = new OperationSettingDialog(this);
-            dialog->show();
+            OperationSettingDialog* dialog = new OperationSettingDialog(nullptr, this);
+            if (dialog->exec() == QDialog::Accepted) {
+                updateOperationTable();
+            }
         });
 
         QPushButton* editBtn = new QPushButton("Edit...");
+        connect(editBtn, &QPushButton::clicked, [=]() {
+            int selected = table->currentRow();
+            if (selected != -1) {
+                Operation* op = task->getOperationAt(selected);
+                OperationSettingDialog* dialog = new OperationSettingDialog(op, this);
+                if (dialog->exec() == QDialog::Accepted) {
+                    updateOperationTable();
+                }
+            }
+        });
+
         QPushButton* removeBtn = new QPushButton("Remove...");
+        connect(removeBtn, &QPushButton::clicked, [=]() {
+            int selected = table->currentRow();
+            if (selected != -1) {
+                task->removeOperationAt(selected);
+                updateOperationTable();
+            }
+        });
 
         QWidget* w = new QWidget();
         QGridLayout* l = new QGridLayout(w);
@@ -145,7 +178,6 @@ private:
         table->setHorizontalHeaderLabels(kJournalTableLabels);
         table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
         table->verticalHeader()->hide();
-        table->setRowCount(1);
 
         QWidget* w = new QWidget();
         QGridLayout* l = new QGridLayout(w);
@@ -153,6 +185,10 @@ private:
         tabWidget->addTab(w, "Journal");
         journalTable = table;
     }
+
+    void updateTriggerTable();
+
+    void updateOperationTable();
 
 private:
     Task* task;

@@ -20,7 +20,7 @@
 import os
 
 
-class LineNumberCounter:
+class LineCounter:
     DEFAULT_FILE_EXTENSIONS = [".cpp", ".c", ".h", ".hpp", ".py", ".java"]
     total_line_count = 0
     file_count = 0
@@ -61,5 +61,5 @@ class LineNumberCounter:
 
 
 if __name__ == '__main__':
-    LineNumberCounter().run()
+    LineCounter().run()
     input()

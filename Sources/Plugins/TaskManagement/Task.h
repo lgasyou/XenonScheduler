@@ -47,6 +47,14 @@ public:
         triggers.append(trigger);
     }
 
+    void removeOperationAt(int index) {
+        operations.remove(index);
+    }
+
+    void removeTriggerAt(int index) {
+        triggers.remove(index);
+    }
+
     QMap<QProcess::ProcessState, int> getState() const {
         QMap<QProcess::ProcessState, int> ret;
         ret[QProcess::Running] = ret[QProcess::Starting] = ret[QProcess::NotRunning] = 0;
@@ -65,6 +73,14 @@ public:
             }
         }
         return time;
+    }
+
+    Operation* getOperationAt(int index) const {
+        return operations[index];
+    }
+
+    Trigger* getTriggerAt(int index) const {
+        return triggers[index];
     }
 
     const QString& getName() const;

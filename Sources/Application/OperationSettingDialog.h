@@ -3,12 +3,22 @@
 
 #include <QDialog>
 
+class Operation;
+
 class OperationSettingDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit OperationSettingDialog(QWidget *parent = 0);
+    explicit OperationSettingDialog(Operation* op, QWidget *parent = 0);
     ~OperationSettingDialog();
+
+private:
+    void setupAsCreationDialog();
+
+    void setupAsSettingDialog();
+
+private:
+    Operation* operation;
 
 };
 

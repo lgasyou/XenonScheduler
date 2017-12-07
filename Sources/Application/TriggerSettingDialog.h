@@ -3,12 +3,22 @@
 
 #include <QDialog>
 
+class Trigger;
+
 class TriggerSettingDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit TriggerSettingDialog(QWidget *parent = 0);
+    explicit TriggerSettingDialog(Trigger* trigger, QWidget *parent = 0);
     ~TriggerSettingDialog();
+
+private:
+    void setupAsCreationDialog();
+
+    void setupAsSettingDialog();
+
+private:
+    Trigger* trigger;
 
 };
 

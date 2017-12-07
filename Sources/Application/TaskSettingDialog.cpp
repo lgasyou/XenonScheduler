@@ -11,6 +11,13 @@ void TaskSettingDialog::showEvent(QShowEvent *e) {
     locationEdit->setDisabled(true);
     briefEdit->setPlainText(task->getDescription());
 
+    updateTriggerTable();
+    updateOperationTable();
+
+    QDialog::showEvent(e);
+}
+
+void TaskSettingDialog::updateTriggerTable() {
     const QVector<Trigger*>& triggers = task->getTriggers();
     triggerTable->setRowCount(triggers.size());
     for (int i = 0, size = triggers.size(); i != size; ++i) {
@@ -19,7 +26,9 @@ void TaskSettingDialog::showEvent(QShowEvent *e) {
         triggerTable->setItem(i, 1, new QTableWidgetItem(QString("Every %1").arg(t->interval)));
         triggerTable->setItem(i, 2, new QTableWidgetItem("Activated"));
     }
+}
 
+void TaskSettingDialog::updateOperationTable() {
     const QVector<Operation*>& operations = task->getOperations();
     operationTable->setRowCount(operations.size());
     for (int i = 0, size = operations.size(); i != size; ++i) {
@@ -27,8 +36,6 @@ void TaskSettingDialog::showEvent(QShowEvent *e) {
         operationTable->setItem(i, 0, new QTableWidgetItem(o->program));
         operationTable->setItem(i, 1, new QTableWidgetItem(o->arguments.join(' ')));
     }
-
-    QDialog::showEvent(e);
 }
 
 static inline QString IntervalType2StringHelper(Trigger::IntervalType type) {
