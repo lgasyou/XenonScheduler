@@ -10,6 +10,7 @@
 #include <QSpinBox>
 #include <QFileDialog>
 #include <tuple>
+#include <exception>
 
 #include "Scheduler.h"
 
@@ -120,7 +121,7 @@ private:
         if (loginBtn->isChecked()) {
             return TaskCreationWizard::LoginTriggerPage;
         }
-        throw std::exception("Unreachable");
+        throw std::exception();
     }
 
 private:
@@ -440,33 +441,33 @@ static std::tuple<QDateTime, Trigger::IntervalType, int> GetExecuteTimeHelper(Ta
     if (wizard->field("day").toBool()) {
         QDateTime startTime = wizard->field("dailyStartTime").toDateTime();
         int interval = wizard->field("everyNDays").toInt();
-        return { startTime, Trigger::Day, interval };
+        return std::make_tuple(startTime, Trigger::Day, interval);
     }
 
     if (wizard->field("week").toBool()) {
         QDateTime startTime = wizard->field("weeklyStartTime").toDateTime();
         int interval = wizard->field("everyNWeeks").toInt();
-        return { startTime, Trigger::Week, interval };
+        return std::make_tuple(startTime, Trigger::Week, interval);
     }
 
     if (wizard->field("month").toBool()) {
         QDateTime startTime = wizard->field("monthlyStartTime").toDateTime();
         int interval = wizard->field("everyNMonths").toInt();
-        return { startTime, Trigger::Month, interval };
+        return std::make_tuple(startTime, Trigger::Month, interval);
     }
 
     if (wizard->field("once").toBool()) {
         QDateTime startTime = wizard->field("onceStartTime").toDateTime();
-        return { startTime, Trigger::Once, -1 };
+        return std::make_tuple(startTime, Trigger::Once, -1);
     }
 
     if (wizard->field("startingUp").toBool()) {
-        return { QDateTime(), Trigger::StartingUp, -1 };
+        return std::make_tuple(QDateTime(), Trigger::StartingUp, -1);
     }
 
     if (wizard->field("login").toBool()) {
-        return { QDateTime(), Trigger::Login, -1 };
+        return std::make_tuple(QDateTime(), Trigger::Login, -1);
     }
 
-    throw std::exception("Unreachable");
+    throw std::exception();
 }

@@ -7,11 +7,14 @@
 #include <QDebug>
 
 #include "Plugins/TaskManagement/TaskManager.h"
+#include "Plugins/TaskManagement/Task.h"
 #include "TaskSettingDialog.h"
+#include "Scheduler.h"
 
-TaskTableWidget::TaskTableWidget(TaskManager* taskManager, QWidget* parent)
-    : QTableWidget(parent),
-      taskManager(taskManager)
+TaskTableWidget::TaskTableWidget(TaskManager* taskManager, Scheduler* scheduler)
+    : QTableWidget(scheduler),
+      taskManager(taskManager),
+      scheduler(scheduler)
 {
     setColumnCount(kTableLabels.size());
     setHorizontalHeaderLabels(kTableLabels);
@@ -37,11 +40,8 @@ TaskTableWidget::TaskTableWidget(TaskManager* taskManager, QWidget* parent)
             [=]() { taskManager->startTaskAt(rowClicked); });
     connect(stopAct, &QAction::triggered,
             [=]() { taskManager->stopTaskAt(rowClicked); });
-    connect(showOptionAct, &QAction::triggered, [=]() {
-        Task* task = taskManager->get(rowClicked);
-        TaskSettingDialog* dialog = new TaskSettingDialog(task, this);
-        dialog->show();
-    });
+    connect(showOptionAct, &QAction::triggered,
+            this, &TaskTableWidget::showTaskSetting);
 }
 
 void TaskTableWidget::onRightMouseClicked(const QPoint& point) {
@@ -55,4 +55,14 @@ void TaskTableWidget::onRightMouseClicked(const QPoint& point) {
         rowClicked = item->row();
         popMenu->exec(QCursor::pos());
     }
+}
+
+void TaskTableWidget::showTaskSetting() {
+    Task* task = taskManager->get(rowClicked);
+    TaskSettingDialog* dialog = new TaskSettingDialog(task, this);
+    connect(dialog, &TaskSettingDialog::taskChanged, [=](Task* task) {
+        int index = taskManager->indexOf(task);
+        scheduler->updateRow(index);
+    });
+    dialog->show();
 }

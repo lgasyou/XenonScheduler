@@ -11,6 +11,8 @@
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QApplication>
+#include <QSettings>
+#include <QDir>
 #include <QDebug>
 
 #include "Plugins/TaskManagement/TaskManager.h"
@@ -68,9 +70,8 @@ private:
     }
 
     void setupTaskTable() {
-        QTableWidget* t = new TaskTableWidget(&taskManager);
-        setCentralWidget(t);
-        taskTable = t;
+        taskTable = new TaskTableWidget(&taskManager, this);
+        setCentralWidget(taskTable);
     }
 
     void setupSystemTray() {
@@ -85,8 +86,11 @@ private:
         connect(restoreWindowAct,   &QAction::triggered,
                 this,               &Scheduler::showNormal);
 
-        // TODO: open at boot.
+        // TODO: open at boot in all platform.
         QAction* openAtBoot = new QAction("Open at boot", &s);
+        openAtBoot->setCheckable(true);
+        connect(openAtBoot, &QAction::triggered,
+                this, &Scheduler::openAtBoot);
 
         QAction* quitAct = new QAction("Quit", &s);
         connect(quitAct, &QAction::triggered,
@@ -108,11 +112,9 @@ private:
 //        int retCode = dialog.exec();
 //        if (retCode == QDialog::Accepted) {
 //            e->accept();
-//        } else if (retCode == QDialog::Rejected) {
-//            e->ignore();
-//            hide();
 //        } else {
 //            e->ignore();
+//            hide();
 //        }
 
         e->accept();
@@ -128,6 +130,18 @@ private:
     void insertRowWithoutChangeTaskManager(Task* task, int index = -1);
 
 private slots:
+    void openAtBoot(bool should) {
+        const char* kWindowsRunPath = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
+        QSettings reg(kWindowsRunPath, QSettings::NativeFormat);
+
+        if (should) {
+            QString appPath = QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
+            reg.setValue(kAppName, appPath);
+        } else {
+            reg.remove(kAppName);
+        }
+    }
+
     void onSystemTrayActivated(QSystemTrayIcon::ActivationReason reason) {
         switch (reason) {
         case QSystemTrayIcon::Trigger:
@@ -142,8 +156,8 @@ private slots:
 private:
     TaskManager taskManager;
 
-    QSystemTrayIcon systemTray;
     TaskCreationWizard wizard;
+    QSystemTrayIcon systemTray;
     GeneralSettingDialog settingDialog;
 
     QToolBar* toolBar;

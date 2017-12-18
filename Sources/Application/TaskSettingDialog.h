@@ -32,7 +32,7 @@ class TaskSettingDialog : public QDialog {
     };
 
 public:
-    explicit TaskSettingDialog::TaskSettingDialog(Task* task, QWidget *parent = 0) :
+    explicit TaskSettingDialog(Task* task, QWidget *parent = 0) :
         QDialog(parent),
         task(task),
         tabWidget(new QTabWidget())
@@ -88,6 +88,7 @@ private:
             if (dialog->exec() == QDialog::Accepted) {
                 updateTriggerTable();
                 delete dialog;
+                emit taskChanged(task);
             }
         });
 
@@ -100,6 +101,7 @@ private:
                 if (dialog->exec() == QDialog::Accepted) {
                     updateTriggerTable();
                     delete dialog;
+                    emit taskChanged(task);
                 }
             }
         });
@@ -110,6 +112,7 @@ private:
             if (selected != -1) {
                 task->removeTriggerAt(selected);
                 updateTriggerTable();
+                emit taskChanged(task);
             }
         });
 
@@ -143,6 +146,7 @@ private:
                 task->addOperation(newOp);
                 updateOperationTable();
                 delete dialog;
+                emit taskChanged(task);
             }
         });
 
@@ -155,6 +159,7 @@ private:
                 if (dialog->exec() == QDialog::Accepted) {
                     updateOperationTable();
                     delete dialog;
+                    emit taskChanged(task);
                 }
             }
         });
@@ -165,6 +170,7 @@ private:
             if (selected != -1) {
                 task->removeOperationAt(selected);
                 updateOperationTable();
+                emit taskChanged(task);
             }
         });
 
@@ -195,6 +201,9 @@ private:
     void updateTriggerTable();
 
     void updateOperationTable();
+
+signals:
+    void taskChanged(Task* task);
 
 private:
     Task* task;

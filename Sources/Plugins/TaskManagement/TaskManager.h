@@ -29,6 +29,7 @@ public:
     TaskManager(qint64 checkInterval = 1);
     ~TaskManager() {
         autorunThread.terminate();
+        autorunThread.wait();
         for (Task* t : tasks) {
             t->kill();
             delete t;

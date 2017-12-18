@@ -5,6 +5,7 @@
 
 class QMenu;
 class QAction;
+class Scheduler;
 class TaskManager;
 
 class TaskTableWidget : public QTableWidget {
@@ -17,13 +18,17 @@ class TaskTableWidget : public QTableWidget {
     };
 
 public:
-    TaskTableWidget(TaskManager* taskManager, QWidget* parent = 0);
+    TaskTableWidget(TaskManager* taskManager, Scheduler* scheduler);
 
 private:
     void onRightMouseClicked(const QPoint& point);
 
+private slots:
+    void showTaskSetting();
+
 private:
     TaskManager* taskManager;
+    Scheduler* scheduler;
 
     QMenu* popMenu;
     QAction* startAct;
